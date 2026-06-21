@@ -43,9 +43,16 @@
 
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
             <h3 class="mb-4 text-lg font-bold text-slate-900 tracking-tight">Checkout Details</h3>
-            <div class="space-y-1.5">
-                <label for="custName" class="text-sm font-bold text-slate-700">Your Name *</label>
-                <input type="text" id="custName" placeholder="Enter name for order pickup" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10">
+            <div class="space-y-3">
+                <div class="space-y-1.5">
+                    <label for="custName" class="text-sm font-bold text-slate-700">Your Name *</label>
+                    <input type="text" id="custName" placeholder="Enter name for order pickup" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10">
+                </div>
+                <!-- 📝 NEW CUSTOMER NOTES FIELD MODULE -->
+                <div class="space-y-1.5">
+                    <label for="custNotes" class="text-sm font-bold text-slate-700">Notes / Requests (Optional)</label>
+                    <textarea id="custNotes" rows="2" placeholder="e.g. Extra spicy, Pickup at 6:00 PM, No sugar..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10 resize-none"></textarea>
+                </div>
             </div>
             <div id="cart-summary" class="mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200">Cart is empty</div>
             <button class="mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98]" onclick="processExpressCheckout()">Proceed & Pay via UPI</button>
@@ -186,6 +193,7 @@
     </div>
 </div>
 
+<!-- HIGH-IMPACT EMERGENCY POPUP BLOCKS (UPDATED FOR NOTES INBOUNDS) -->
 <div id="kds-alert-overlay" class="hidden fixed inset-0 bg-orange-600 z-50 flex flex-col justify-center items-center text-white animate-pulse p-6 text-center">
     <div class="text-8xl mb-4">🔔</div>
     <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
@@ -452,6 +460,8 @@
 
     function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
+        const notesInput = document.getElementById('custNotes').value.trim();
+        
         if (!nameInput) { alert("Please enter your name!"); return; }
         if (currentCart.length === 0) { alert("Your cart is empty."); return; }
 
@@ -463,6 +473,7 @@
         const newOrder = {
             id: orderId,
             customer: nameInput,
+            notes: notesInput || "None", // Capture custom note block safely
             items: currentCart.join(', '),
             total: cartTotal,
             time: timestamp,
@@ -478,8 +489,9 @@
 
         currentCart = []; cartTotal = 0;
         document.getElementById('custName').value = '';
+        document.getElementById('custNotes').value = '';
         const summary = document.getElementById('cart-summary');
-        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200";
+        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-dashed border-slate-200";
         summary.innerText = 'Cart is empty';
     }
 
@@ -491,8 +503,6 @@
             localStorage.setItem('express_orders', JSON.stringify(orders));
             renderOwnerDashboard();
             calculateRevenueDashboard();
-            
-            // Trigger specific cash receipt announcement override
             triggerVocalNotification(targetOrder.customer, targetOrder.total, true);
         }
     }
@@ -509,7 +519,7 @@
         const lastAnnounced = localStorage.getItem('last_announced_id');
         if (orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
             triggerVocalNotification(orders[0].customer, orders[0].total, false);
-            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total);
+            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
             localStorage.setItem('last_announced_id', orders[0].id.toString());
         }
 
@@ -520,9 +530,14 @@
                         <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.id} — ${order.customer}</span>
                         <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
                     </div>
-                    <div class="my-2.5 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
+                    <div class="my-2 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
+                    
+                    <!-- Render Notes Block inside Receipt Card Line -->
+                    <div class="my-2 p-2 rounded-xl text-xs font-semibold ${isTheaterModeActive ? 'bg-slate-950 border border-slate-800 text-orange-400' : 'bg-amber-50/70 border border-amber-100 text-amber-800'}">
+                        📌 <strong>Notes:</strong> ${order.notes}
+                    </div>
                 </div>
-                <div class="mt-2 pt-2 border-t border-dashed border-slate-100 flex items-center justify-between">
+                <div class="mt-2 pt-2 border-t border-dashed border-slate-200/60 flex items-center justify-between">
                     <div class="text-base font-black ${order.paymentMethod === 'Cash' ? 'text-amber-600' : 'text-emerald-600'}">
                         ✓ Collected: ₹${order.total} (${order.paymentMethod})
                     </div>
@@ -536,8 +551,14 @@
         `).join('');
     }
 
-    function triggerKDSAlertOverlay(name, items, total) {
-        document.getElementById('kds-alert-body').innerHTML = `Name: ${name} <br> Total: ₹${total} <br><br> <span class="text-sm font-normal text-orange-100 font-mono">${items}</span>`;
+    function triggerKDSAlertOverlay(name, items, total, notes) {
+        document.getElementById('kds-alert-body').innerHTML = `
+            Name: ${name} <br> Total: ₹${total} <br><br> 
+            <span class="text-sm font-normal text-orange-100 font-mono">${items}</span> <br><br>
+            <div class="text-xs bg-black/30 p-3 rounded-xl border border-white/10 text-white font-sans text-left">
+                💡 <strong>Customer Note:</strong> ${notes}
+            </div>
+        `;
         document.getElementById('kds-alert-overlay').classList.remove('hidden');
     }
 
@@ -554,17 +575,10 @@
     function triggerVocalNotification(name, total, isCashPayment = false) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); 
-            
             let phrasing = `Payment received. New order for ${name}. Amount ${total} rupees.`;
-            if (isCashPayment) {
-                phrasing = `Payment received via cash for ${name}. Amount ${total} rupees.`;
-            }
-
+            if (isCashPayment) phrasing = `Payment received via cash for ${name}. Amount ${total} rupees.`;
             const announcement = new SpeechSynthesisUtterance(phrasing);
-            announcement.lang = 'en-IN'; 
-            announcement.rate = 0.95;
-            announcement.volume = 1.0; // Sets absolute maximum software amplification mix
-            
+            announcement.lang = 'en-IN'; announcement.rate = 0.95; announcement.volume = 1.0;
             window.speechSynthesis.speak(announcement);
         }
     }
