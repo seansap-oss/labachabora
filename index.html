@@ -31,8 +31,13 @@
             </div>
         </div>
 
+        <!-- Category Menu Navigation Tabs -->
+        <div class="flex gap-2 border-b border-slate-200 pb-1">
+            <button id="cat-tab-drinks" onclick="switchMenuCategory('Tea/Coffee')" class="pb-2 px-4 text-sm font-bold text-blue-900 border-b-2 border-blue-900 transition-all">☕ Tea / Coffee</button>
+            <button id="cat-tab-food" onclick="switchMenuCategory('Food')" class="pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all">🍔 Food Items</button>
+        </div>
+
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-            <h3 class="mb-3 text-lg font-bold text-slate-900 tracking-tight">Select Your Items</h3>
             <div id="customer-menu-list" class="divide-y divide-slate-100"></div>
         </div>
 
@@ -54,8 +59,6 @@
         <div class="rounded-2xl bg-slate-900 p-6 text-center text-white shadow-md relative">
             <h2 class="text-2xl font-black tracking-tight text-amber-500">Live Counter Dashboard</h2>
             <p class="mt-1 text-sm font-medium text-slate-400">Active Real-Time Requests</p>
-            
-            <!-- Theater Mode Expand Button -->
             <button onclick="toggleTheaterMode(true)" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 font-bold flex items-center gap-1 transition">
                 🖵 KDS Theater Mode
             </button>
@@ -63,9 +66,7 @@
         <div class="flex justify-end">
             <button class="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition" onclick="clearAllOrders()">Clear Order History</button>
         </div>
-        <div id="incoming-orders-list" class="space-y-3">
-            <p class="py-12 text-center text-sm font-medium text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">Waiting for new orders...</p>
-        </div>
+        <div id="incoming-orders-list" class="space-y-3"></div>
     </div>
 
     <!-- ========================================== -->
@@ -77,7 +78,27 @@
             <p class="mt-1 text-sm font-medium text-slate-400">Manage Branding & Menu Ecosystem</p>
         </div>
 
-        <!-- AVIT SOLUTIONS LICENSING & SUBSCRIPTION PANEL -->
+        <!-- REAL-TIME REVENUE ANALYTICS DASHBOARD -->
+        <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-white p-4 shadow-sm border border-slate-100 text-center">
+                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400">Total Revenue</span>
+                <h3 class="text-2xl font-black text-slate-900 mt-1" id="stat-total-revenue">₹0</h3>
+            </div>
+            <div class="rounded-xl bg-white p-4 shadow-sm border border-slate-100 text-center">
+                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400">Orders Logged</span>
+                <h3 class="text-2xl font-black text-slate-900 mt-1" id="stat-total-orders">0</h3>
+            </div>
+            <div class="rounded-xl bg-emerald-50 p-4 shadow-sm border border-emerald-100 text-center">
+                <span class="text-[10px] uppercase font-black tracking-wider text-emerald-600">UPI Collected</span>
+                <h3 class="text-xl font-black text-emerald-700 mt-1" id="stat-upi-revenue">₹0</h3>
+            </div>
+            <div class="rounded-xl bg-amber-50 p-4 shadow-sm border border-amber-100 text-center">
+                <span class="text-[10px] uppercase font-black tracking-wider text-amber-600">Cash Collected</span>
+                <h3 class="text-xl font-black text-amber-700 mt-1" id="stat-cash-revenue">₹0</h3>
+            </div>
+        </div>
+
+        <!-- AVIT LICENSING MODULE -->
         <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 p-5 shadow-md border border-slate-800 text-white space-y-3">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">System License</span>
@@ -93,25 +114,25 @@
             </div>
         </div>
 
-        <div class="rounded-2xl bg-white p-5 shadow-md border-2 border-purple-500/30 flex flex-col items-center text-center space-y-3">
-            <h3 class="text-base font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
-            <p class="text-xs text-slate-500 max-w-[280px]">Point your smartphone camera at this live generated code to test the customer workflow locally.</p>
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+        <!-- QR Code Target Container Box -->
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
+            <h3 class="text-sm font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
+            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
                 <div id="qrcode-target" class="mx-auto"></div>
             </div>
-            <div class="text-[10px] font-mono text-slate-400 select-all bg-slate-100 px-2 py-1 rounded max-w-full truncate" id="qrcode-url-text"></div>
+            <div class="text-[10px] font-mono text-slate-400 truncate max-w-full" id="qrcode-url-text"></div>
         </div>
 
-        <!-- Identity & Banner Settings -->
+        <!-- Identity Settings -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-600">Merchant UPI ID (VPA)</label>
-                <input type="text" id="admin-upi" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. business@okaxis">
+                <input type="text" id="admin-upi" class="w-full rounded-xl border p-2.5 text-sm">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-600">Brand Name</label>
-                <input type="text" id="admin-brand-name" class="w-full rounded-xl border p-2.5 text-sm" placeholder="Laba ChaBora">
+                <input type="text" id="admin-brand-name" class="w-full rounded-xl border p-2.5 text-sm">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-600">Upload Header Banner Image</label>
@@ -120,24 +141,40 @@
             <button class="w-full bg-slate-900 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-slate-800 transition" onclick="saveSystemSettings()">Save Core Changes</button>
         </div>
 
-        <!-- Menu Creator Form -->
+        <!-- DISH CREATOR WITH IMAGE UPLOADER & CATEGORY SELECT -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">2. Add New Menu Dish</h3>
-            <div class="grid grid-cols-3 gap-2">
-                <div class="col-span-2 space-y-1">
-                    <label class="text-xs font-bold text-slate-600">Dish Title</label>
-                    <input type="text" id="new-item-name" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. Hot Filter Coffee">
+            <div class="space-y-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-2 space-y-1">
+                        <label class="text-xs font-bold text-slate-600">Dish Title</label>
+                        <input type="text" id="new-item-name" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. Filter Coffee">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-600">Price (₹)</label>
+                        <input type="number" id="new-item-price" class="w-full rounded-xl border p-2.5 text-sm" placeholder="80">
+                    </div>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-600">Price (₹)</label>
-                    <input type="number" id="new-item-price" class="w-full rounded-xl border p-2.5 text-sm" placeholder="80">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-600">Menu Category</label>
+                        <select id="new-item-category" class="w-full rounded-xl border p-2.5 text-sm bg-white">
+                            <option value="Tea/Coffee">☕ Tea/Coffee</option>
+                            <option value="Food">🍔 Food</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-600">Dish Thumbnail Image</label>
+                        <input type="file" id="new-item-image" accept="image/*" class="w-full text-xs pt-2">
+                    </div>
                 </div>
             </div>
             <button class="w-full bg-purple-600 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-purple-700 transition" onclick="addNewMenuItem()">Add Product To Menu Live</button>
         </div>
 
+        <!-- MASTER INVENTORY LIST CONSOLE -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-            <h3 class="mb-3 text-base font-bold text-slate-900 tracking-tight border-b pb-2">3. Current Active Products</h3>
+            <h3 class="mb-3 text-base font-bold text-slate-900 tracking-tight border-b pb-2">3. Current Active Products & Stock Status</h3>
             <div id="admin-menu-list" class="divide-y divide-slate-100"></div>
         </div>
     </div>
@@ -149,26 +186,19 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!--       HIGH-IMPACT EMERGENCY POPUP BLOCKS    -->
-<!-- ========================================== -->
 <div id="kds-alert-overlay" class="hidden fixed inset-0 bg-orange-600 z-50 flex flex-col justify-center items-center text-white animate-pulse p-6 text-center">
     <div class="text-8xl mb-4">🔔</div>
     <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
-    <p class="text-2xl font-bold mt-4 bg-black/20 px-6 py-3 rounded-2xl border border-white/20" id="kds-alert-body">Loading customer info...</p>
-    <button onclick="dismissKDSAlert()" class="mt-8 bg-white text-orange-600 font-black text-lg px-8 py-4 rounded-xl shadow-2xl tracking-wide active:scale-95 transition">DISMISS ORDER ALERT</button>
+    <p class="text-2xl font-bold mt-4 bg-black/20 px-6 py-3 rounded-2xl border border-white/20" id="kds-alert-body"></p>
+    <button onclick="dismissKDSAlert()" class="mt-8 bg-white text-orange-600 font-black text-lg px-8 py-4 rounded-xl shadow-2xl tracking-wide">DISMISS ORDER ALERT</button>
 </div>
 
 <script>
-    let systemConfig = {
-        upi: "devranakitchen@okaxis",
-        brandName: "Laba ChaBora",
-        bannerBase64: ""
-    };
+    let systemConfig = { upi: "devranakitchen@okaxis", brandName: "Laba ChaBora", bannerBase64: "" };
     
     const defaultItems = [
-        { id: 1, name: "Classic Filter Coffee", price: 80 },
-        { id: 2, name: "Butter Masala Dosa", price: 140 }
+        { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
+        { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
     ];
 
     let activeMenu = [];
@@ -176,9 +206,10 @@
     let cartTotal = 0;
     let qrEngineInstance = null;
     let isTheaterModeActive = false;
+    let selectedCategoryFilter = "Tea/Coffee";
 
     function switchView(viewName) {
-        if(isTheaterModeActive) toggleTheaterMode(false); // Force exit if changing tab views
+        if(isTheaterModeActive) toggleTheaterMode(false);
         const sections = ['customer', 'owner', 'admin'];
         sections.forEach(sec => {
             const el = document.getElementById(`${sec}-view`);
@@ -193,6 +224,21 @@
         });
     }
 
+    function switchMenuCategory(catName) {
+        selectedCategoryFilter = catName;
+        const btnDrinks = document.getElementById('cat-tab-drinks');
+        const btnFood = document.getElementById('cat-tab-food');
+        
+        if(catName === "Tea/Coffee") {
+            btnDrinks.className = "pb-2 px-4 text-sm font-bold text-blue-900 border-b-2 border-blue-900 transition-all";
+            btnFood.className = "pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all";
+        } else {
+            btnFood.className = "pb-2 px-4 text-sm font-bold text-blue-900 border-b-2 border-blue-900 transition-all";
+            btnDrinks.className = "pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all";
+        }
+        renderFrontendMenu();
+    }
+
     function toggleTheaterMode(activate) {
         isTheaterModeActive = activate;
         const body = document.getElementById('main-body');
@@ -205,13 +251,12 @@
             wrapper.className = "w-full max-w-full p-6 space-y-4";
             nav.classList.add('hidden');
             footer.classList.add('hidden');
-            // Inject a quick exit float button header on top of dashboard row
             const checkHeader = document.getElementById('kds-exit-banner');
             if(!checkHeader) {
                 const exitBtn = document.createElement('div');
                 exitBtn.id = "kds-exit-banner";
                 exitBtn.className = "bg-slate-900 text-white px-4 py-2 flex justify-between items-center rounded-xl border border-slate-800 text-xs font-bold mb-2";
-                exitBtn.innerHTML = `<span>📺 LIVE EXTREME THEATER MONITORS ACTIVE</span><button onclick="toggleTheaterMode(false)" class="bg-red-600 px-3 py-1 rounded text-white">Exit Fullscreen</button>`;
+                exitBtn.innerHTML = `<span>📺 LIVE KITCHEN DISPLAY THEATER ACTIVE</span><button onclick="toggleTheaterMode(false)" class="bg-red-600 px-3 py-1 rounded text-white">Exit</button>`;
                 document.getElementById('owner-view').prepend(exitBtn);
             }
         } else {
@@ -230,8 +275,9 @@
             switchView('admin');
             populateAdminForm();
             generateLiveAppQR();
+            calculateRevenueDashboard();
         } else {
-            alert("Unauthorized Access. Access Token Invalid.");
+            alert("Unauthorized Access.");
         }
     }
 
@@ -240,23 +286,13 @@
         document.getElementById('qrcode-url-text').innerText = currentTargetURL;
         const qrContainer = document.getElementById('qrcode-target');
         qrContainer.innerHTML = "";
-        qrEngineInstance = new QRCode(qrContainer, {
-            text: currentTargetURL,
-            width: 160,
-            height: 160,
-            colorDark : "#1a337a",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        qrEngineInstance = new QRCode(qrContainer, { text: currentTargetURL, width: 140, height: 140, colorDark : "#1a337a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
     }
 
     function handleBannerUpload(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                systemConfig.bannerBase64 = e.target.result;
-                applyRenderedConfigurations();
-            };
+            reader.onload = function(e) { systemConfig.bannerBase64 = e.target.result; applyRenderedConfigurations(); };
             reader.readAsDataURL(input.files[0]);
         }
     }
@@ -267,7 +303,7 @@
         localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
         applyRenderedConfigurations();
         generateLiveAppQR();
-        alert("System branding settings deployed successfully!");
+        alert("Settings saved!");
     }
 
     function populateAdminForm() {
@@ -278,11 +314,7 @@
     function applyRenderedConfigurations() {
         document.getElementById('display-brand-name').innerText = systemConfig.brandName;
         const bannerElement = document.getElementById('hero-banner-container');
-        if (systemConfig.bannerBase64) {
-            bannerElement.style.backgroundImage = `url('${systemConfig.bannerBase64}')`;
-        } else {
-            bannerElement.style.backgroundImage = 'none';
-        }
+        bannerElement.style.backgroundImage = systemConfig.bannerBase64 ? `url('${systemConfig.bannerBase64}')` : 'none';
     }
 
     function loadInitialState() {
@@ -296,7 +328,6 @@
             activeMenu = [...defaultItems];
             localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
         }
-        
         applyRenderedConfigurations();
         renderFrontendMenu();
         renderAdminMenuList();
@@ -304,13 +335,31 @@
 
     function renderFrontendMenu() {
         const list = document.getElementById('customer-menu-list');
-        list.innerHTML = activeMenu.map(item => `
-            <div class="flex items-center justify-between py-4">
-                <div>
-                    <strong class="block text-base font-semibold text-slate-900">${item.name}</strong>
-                    <span class="text-sm font-medium text-slate-500">₹${item.price}</span>
+        const itemsToDisplay = activeMenu.filter(i => i.category === selectedCategoryFilter);
+
+        if(itemsToDisplay.length === 0) {
+            list.innerHTML = `<p class="text-center py-6 text-xs font-medium text-slate-400">No items available in this section yet.</p>`;
+            return;
+        }
+
+        list.innerHTML = itemsToDisplay.map(item => `
+            <div class="flex items-center justify-between py-4 transition-all ${!item.available ? 'bg-slate-50/60 rounded-xl px-2 my-1 border border-dashed border-slate-200' : ''}">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        ${item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border bg-slate-100 ${!item.available ? 'grayscale blur-[0.5px]' : ''}">` : `<div class="w-12 h-12 rounded-xl bg-slate-100 border flex items-center justify-center text-xs text-slate-400">🍲</div>`}
+                        ${!item.available ? `<div class="absolute inset-0 bg-red-600/10 rounded-xl flex items-center justify-center"><span class="text-[9px] font-black text-red-600 bg-white px-1 py-0.5 rounded shadow-sm border border-red-200 uppercase tracking-tight scale-90">Not Stock</span></div>` : ''}
+                    </div>
+                    <div>
+                        <strong class="block text-base font-semibold ${!item.available ? 'text-slate-400 line-through' : 'text-slate-900'}">${item.name}</strong>
+                        <span class="text-sm font-medium ${!item.available ? 'text-slate-400' : 'text-slate-500'}">₹${item.price}</span>
+                    </div>
                 </div>
-                <button class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 active:scale-95" onclick="addToCart('${item.name}', ${item.price})">+ Add</button>
+                <div>
+                    ${item.available 
+                        ? `<button class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600 active:scale-95" onclick="addToCart('${item.name}', ${item.price})">+ Add</button>`
+                        : `<button disabled class="rounded-lg bg-slate-200 px-3 py-2 text-sm font-bold text-slate-400 cursor-not-allowed">Unavailable</button>`
+                    }
+                </div>
             </div>
         `).join('');
     }
@@ -319,42 +368,78 @@
         const list = document.getElementById('admin-menu-list');
         list.innerHTML = activeMenu.map(item => `
             <div class="flex items-center justify-between py-3">
-                <div>
-                    <span class="font-bold text-slate-900 text-sm">${item.name}</span>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded ml-2">₹${item.price}</span>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleItemAvailability(${item.id}, this.checked)" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500">
+                    <span class="font-bold text-slate-900 text-sm ${!item.available ? 'line-through text-slate-400' : ''}">${item.name} <span class="text-[10px] font-medium text-slate-400">(${item.category})</span></span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">₹${item.price}</span>
                 </div>
-                <button class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition" onclick="deleteMenuItem(${item.id})">Remove</button>
+                <button class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg" onclick="deleteMenuItem(${item.id})">Remove</button>
             </div>
         `).join('');
+    }
+
+    function toggleItemAvailability(id, isChecked) {
+        const item = activeMenu.find(i => i.id === id);
+        if(item) {
+            item.available = isChecked;
+            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+            renderFrontendMenu();
+            renderAdminMenuList();
+        }
     }
 
     function addNewMenuItem() {
         const nameInput = document.getElementById('new-item-name');
         const priceInput = document.getElementById('new-item-price');
+        const catSelect = document.getElementById('new-item-category');
+        const imgInput = document.getElementById('new-item-image');
+
         const name = nameInput.value.trim();
         const price = parseInt(priceInput.value);
+        const category = catSelect.value;
 
         if (!name || isNaN(price)) {
-            alert("Please input a valid product name and numerical price!");
+            alert("Please input a valid name and price!");
             return;
         }
 
-        const newItem = { id: Date.now(), name, price };
-        activeMenu.push(newItem);
-        localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-        
-        nameInput.value = '';
-        priceInput.value = '';
-        
-        renderFrontendMenu();
-        renderAdminMenuList();
+        const proceedAndSave = (base64Img = "") => {
+            const newItem = { id: Date.now(), name, price, category, available: true, image: base64Img };
+            activeMenu.push(newItem);
+            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+            nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
+            renderFrontendMenu(); renderAdminMenuList();
+        };
+
+        if (imgInput.files && imgInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) { proceedAndSave(e.target.result); };
+            reader.readAsDataURL(imgInput.files[0]);
+        } else {
+            proceedAndSave();
+        }
     }
 
     function deleteMenuItem(id) {
         activeMenu = activeMenu.filter(item => item.id !== id);
         localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-        renderFrontendMenu();
-        renderAdminMenuList();
+        renderFrontendMenu(); renderAdminMenuList();
+    }
+
+    function calculateRevenueDashboard() {
+        const orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+        let total = 0, upi = 0, cash = 0;
+        
+        orders.forEach(o => {
+            total += o.total;
+            if(o.paymentMethod === "Cash") cash += o.total;
+            else upi += o.total;
+        });
+
+        document.getElementById('stat-total-revenue').innerText = `₹${total}`;
+        document.getElementById('stat-total-orders').innerText = orders.length;
+        document.getElementById('stat-upi-revenue').innerText = `₹${upi}`;
+        document.getElementById('stat-cash-revenue').innerText = `₹${cash}`;
     }
 
     function addToCart(itemName, price) {
@@ -367,14 +452,8 @@
 
     function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
-        if (!nameInput) {
-            alert("Please enter your name to complete the order!");
-            return;
-        }
-        if (currentCart.length === 0) {
-            alert("Your cart is empty. Add items before paying.");
-            return;
-        }
+        if (!nameInput) { alert("Please enter your name!"); return; }
+        if (currentCart.length === 0) { alert("Your cart is empty."); return; }
 
         const orderId = Math.floor(1000 + Math.random() * 9000);
         const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -386,7 +465,8 @@
             customer: nameInput,
             items: currentCart.join(', '),
             total: cartTotal,
-            time: timestamp
+            time: timestamp,
+            paymentMethod: "UPI Pending"
         };
 
         let existingOrders = JSON.parse(localStorage.getItem('express_orders') || '[]');
@@ -396,12 +476,25 @@
         window.dispatchEvent(new Event('storage'));
         window.location.href = upiIntent;
 
-        currentCart = [];
-        cartTotal = 0;
+        currentCart = []; cartTotal = 0;
         document.getElementById('custName').value = '';
         const summary = document.getElementById('cart-summary');
         summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200";
         summary.innerText = 'Cart is empty';
+    }
+
+    function markOrderAsCash(orderId) {
+        let orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+        const targetOrder = orders.find(o => o.id === orderId);
+        if(targetOrder) {
+            targetOrder.paymentMethod = "Cash";
+            localStorage.setItem('express_orders', JSON.stringify(orders));
+            renderOwnerDashboard();
+            calculateRevenueDashboard();
+            
+            // Trigger specific cash receipt announcement override
+            triggerVocalNotification(targetOrder.customer, targetOrder.total, true);
+        }
     }
 
     function renderOwnerDashboard() {
@@ -415,19 +508,30 @@
 
         const lastAnnounced = localStorage.getItem('last_announced_id');
         if (orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
-            triggerVocalNotification(orders[0].customer, orders[0].total);
+            triggerVocalNotification(orders[0].customer, orders[0].total, false);
             triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total);
             localStorage.setItem('last_announced_id', orders[0].id.toString());
         }
 
         listContainer.innerHTML = orders.map(order => `
-            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition duration-300 hover:shadow-md">
-                <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
-                    <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.id} — ${order.customer}</span>
-                    <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
+            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
+                        <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.id} — ${order.customer}</span>
+                        <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
+                    </div>
+                    <div class="my-2.5 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
                 </div>
-                <div class="my-2.5 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
-                <div class="text-base font-black text-emerald-500 flex items-center gap-1">✓ Payment Received: ₹${order.total}</div>
+                <div class="mt-2 pt-2 border-t border-dashed border-slate-100 flex items-center justify-between">
+                    <div class="text-base font-black ${order.paymentMethod === 'Cash' ? 'text-amber-600' : 'text-emerald-600'}">
+                        ✓ Collected: ₹${order.total} (${order.paymentMethod})
+                    </div>
+                    ${order.paymentMethod === 'UPI Pending' ? `
+                        <button onclick="markOrderAsCash(${order.id})" class="text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl transition">
+                            💵 Switch to Cash Payment
+                        </button>
+                    ` : ''}
+                </div>
             </div>
         `).join('');
     }
@@ -437,33 +541,36 @@
         document.getElementById('kds-alert-overlay').classList.remove('hidden');
     }
 
-    function dismissKDSAlert() {
-        document.getElementById('kds-alert-overlay').classList.add('hidden');
-    }
-
+    function dismissKDSAlert() { document.getElementById('kds-alert-overlay').classList.add('hidden'); }
+    
     function clearAllOrders() {
-        if(confirm("Are you sure you want to completely flush active processing receipts?")) {
+        if(confirm("Flush order records?")) {
             localStorage.removeItem('express_orders');
             localStorage.removeItem('last_announced_id');
-            renderOwnerDashboard();
+            renderOwnerDashboard(); calculateRevenueDashboard();
         }
     }
 
-    function triggerVocalNotification(name, total) {
+    function triggerVocalNotification(name, total, isCashPayment = false) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); 
-            const announcement = new SpeechSynthesisUtterance(`Payment received. New order for ${name}. Amount ${total} rupees.`);
+            
+            let phrasing = `Payment received. New order for ${name}. Amount ${total} rupees.`;
+            if (isCashPayment) {
+                phrasing = `Payment received via cash for ${name}. Amount ${total} rupees.`;
+            }
+
+            const announcement = new SpeechSynthesisUtterance(phrasing);
             announcement.lang = 'en-IN'; 
             announcement.rate = 0.95;
+            announcement.volume = 1.0; // Sets absolute maximum software amplification mix
+            
             window.speechSynthesis.speak(announcement);
         }
     }
 
-    window.addEventListener('storage', renderOwnerDashboard);
-    window.addEventListener('DOMContentLoaded', () => {
-        loadInitialState();
-        renderOwnerDashboard();
-    });
+    window.addEventListener('storage', () => { renderOwnerDashboard(); calculateRevenueDashboard(); });
+    window.addEventListener('DOMContentLoaded', () => { loadInitialState(); renderOwnerDashboard(); });
 </script>
 </body>
 </html>
