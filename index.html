@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVIT Express Menu & Counter</title>
+    <!-- Include Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Local QR Code Generator Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="min-h-full py-6 px-4 font-sans text-slate-800 transition-colors duration-300" id="main-body">
+
+<div class="mx-auto max-w-md pb-12" id="app-wrapper">
+    <!-- View Switcher Tabs -->
+    <div id="navigation-tabs" class="mb-5 flex gap-1 rounded-xl bg-slate-200 p-1">
+        <button id="tab-customer" class="flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all" onclick="switchView('customer')">📱 Menu</button>
+        <button id="tab-owner" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="switchView('owner')">🏪 Orders</button>
+        <button id="tab-admin" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="triggerAdminAuth()">⚙️ Admin</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!--            1. CUSTOMER VIEW                -->
+    <!-- ========================================== -->
+    <div id="customer-view" class="space-y-4">
+        <div id="hero-banner-container" class="relative overflow-hidden rounded-2xl bg-blue-900 p-6 text-center text-white shadow-md bg-cover bg-center min-h-[140px] flex flex-col justify-center items-center">
+            <div class="absolute inset-0 bg-black/40 z-0"></div>
+            <div class="relative z-10">
+                <h2 id="display-brand-name" class="text-2xl font-black tracking-tight drop-shadow-sm">Laba ChaBora</h2>
+                <p class="mt-1 text-sm font-medium text-slate-200 drop-shadow-sm">Scan • Order • Enjoy</p>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
+            <h3 class="mb-3 text-lg font-bold text-slate-900 tracking-tight">Select Your Items</h3>
+            <div id="customer-menu-list" class="divide-y divide-slate-100"></div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
+            <h3 class="mb-4 text-lg font-bold text-slate-900 tracking-tight">Checkout Details</h3>
+            <div class="space-y-1.5">
+                <label for="custName" class="text-sm font-bold text-slate-700">Your Name *</label>
+                <input type="text" id="custName" placeholder="Enter name for order pickup" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10">
+            </div>
+            <div id="cart-summary" class="mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200">Cart is empty</div>
+            <button class="mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98]" onclick="processExpressCheckout()">Proceed & Pay via UPI</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!--            2. OWNER ORDERS VIEW            -->
+    <!-- ========================================== -->
+    <div id="owner-view" class="hidden space-y-4">
+        <div class="rounded-2xl bg-slate-900 p-6 text-center text-white shadow-md relative">
+            <h2 class="text-2xl font-black tracking-tight text-amber-500">Live Counter Dashboard</h2>
+            <p class="mt-1 text-sm font-medium text-slate-400">Active Real-Time Requests</p>
+            
+            <!-- Theater Mode Expand Button -->
+            <button onclick="toggleTheaterMode(true)" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 font-bold flex items-center gap-1 transition">
+                🖵 KDS Theater Mode
+            </button>
+        </div>
+        <div class="flex justify-end">
+            <button class="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition" onclick="clearAllOrders()">Clear Order History</button>
+        </div>
+        <div id="incoming-orders-list" class="space-y-3">
+            <p class="py-12 text-center text-sm font-medium text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">Waiting for new orders...</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!--            3. ADMIN SETUP VIEW             -->
+    <!-- ========================================== -->
+    <div id="admin-view" class="hidden space-y-6">
+        <div class="rounded-2xl bg-slate-800 p-6 text-center text-white shadow-md">
+            <h2 class="text-2xl font-black tracking-tight text-purple-400">Control & Design Panel</h2>
+            <p class="mt-1 text-sm font-medium text-slate-400">Manage Branding & Menu Ecosystem</p>
+        </div>
+
+        <!-- AVIT SOLUTIONS LICENSING & SUBSCRIPTION PANEL -->
+        <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 p-5 shadow-md border border-slate-800 text-white space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">System License</span>
+                <span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider border border-emerald-500/30">Active Tier 1</span>
+            </div>
+            <div>
+                <h4 class="text-lg font-black text-slate-100">AVIT Menu Core Engine</h4>
+                <p class="text-xs text-slate-400 mt-0.5">Provisioned for: <span class="text-slate-200 font-semibold">Laba ChaBora</span></p>
+            </div>
+            <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
+                <div>Billing Cycle: <span class="text-slate-300">Monthly Recurring</span></div>
+                <a href="mailto:avitsolutionstech@gmail.com?subject=Laba%20ChaBora%20License%20Support" class="text-blue-400 font-bold hover:underline">Request Support</a>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-5 shadow-md border-2 border-purple-500/30 flex flex-col items-center text-center space-y-3">
+            <h3 class="text-base font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
+            <p class="text-xs text-slate-500 max-w-[280px]">Point your smartphone camera at this live generated code to test the customer workflow locally.</p>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div id="qrcode-target" class="mx-auto"></div>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 select-all bg-slate-100 px-2 py-1 rounded max-w-full truncate" id="qrcode-url-text"></div>
+        </div>
+
+        <!-- Identity & Banner Settings -->
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
+            <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-600">Merchant UPI ID (VPA)</label>
+                <input type="text" id="admin-upi" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. business@okaxis">
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-600">Brand Name</label>
+                <input type="text" id="admin-brand-name" class="w-full rounded-xl border p-2.5 text-sm" placeholder="Laba ChaBora">
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-600">Upload Header Banner Image</label>
+                <input type="file" id="admin-banner-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" onchange="handleBannerUpload(this)">
+            </div>
+            <button class="w-full bg-slate-900 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-slate-800 transition" onclick="saveSystemSettings()">Save Core Changes</button>
+        </div>
+
+        <!-- Menu Creator Form -->
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
+            <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">2. Add New Menu Dish</h3>
+            <div class="grid grid-cols-3 gap-2">
+                <div class="col-span-2 space-y-1">
+                    <label class="text-xs font-bold text-slate-600">Dish Title</label>
+                    <input type="text" id="new-item-name" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. Hot Filter Coffee">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-600">Price (₹)</label>
+                    <input type="number" id="new-item-price" class="w-full rounded-xl border p-2.5 text-sm" placeholder="80">
+                </div>
+            </div>
+            <button class="w-full bg-purple-600 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-purple-700 transition" onclick="addNewMenuItem()">Add Product To Menu Live</button>
+        </div>
+
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
+            <h3 class="mb-3 text-base font-bold text-slate-900 tracking-tight border-b pb-2">3. Current Active Products</h3>
+            <div id="admin-menu-list" class="divide-y divide-slate-100"></div>
+        </div>
+    </div>
+
+    <!-- Corporate Footer Placement -->
+    <div id="corporate-footer" class="mt-10 border-t border-slate-200 pt-5 text-center text-xs leading-relaxed text-slate-400 font-medium">
+        Digital Menu Ecosystem by AVIT Solutions — From Code to Completion<br>
+        <span class="text-slate-500">Support: avitsolutionstech@gmail.com | Sales: +91 7005476148</span>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!--       HIGH-IMPACT EMERGENCY POPUP BLOCKS    -->
+<!-- ========================================== -->
+<div id="kds-alert-overlay" class="hidden fixed inset-0 bg-orange-600 z-50 flex flex-col justify-center items-center text-white animate-pulse p-6 text-center">
+    <div class="text-8xl mb-4">🔔</div>
+    <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
+    <p class="text-2xl font-bold mt-4 bg-black/20 px-6 py-3 rounded-2xl border border-white/20" id="kds-alert-body">Loading customer info...</p>
+    <button onclick="dismissKDSAlert()" class="mt-8 bg-white text-orange-600 font-black text-lg px-8 py-4 rounded-xl shadow-2xl tracking-wide active:scale-95 transition">DISMISS ORDER ALERT</button>
+</div>
+
+<script>
+    let systemConfig = {
+        upi: "devranakitchen@okaxis",
+        brandName: "Laba ChaBora",
+        bannerBase64: ""
+    };
+    
+    const defaultItems = [
+        { id: 1, name: "Classic Filter Coffee", price: 80 },
+        { id: 2, name: "Butter Masala Dosa", price: 140 }
+    ];
+
+    let activeMenu = [];
+    let currentCart = [];
+    let cartTotal = 0;
+    let qrEngineInstance = null;
+    let isTheaterModeActive = false;
+
+    function switchView(viewName) {
+        if(isTheaterModeActive) toggleTheaterMode(false); // Force exit if changing tab views
+        const sections = ['customer', 'owner', 'admin'];
+        sections.forEach(sec => {
+            const el = document.getElementById(`${sec}-view`);
+            const tab = document.getElementById(`tab-${sec}`);
+            if (sec === viewName) {
+                el.classList.remove('hidden');
+                tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
+            } else {
+                el.classList.add('hidden');
+                tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
+            }
+        });
+    }
+
+    function toggleTheaterMode(activate) {
+        isTheaterModeActive = activate;
+        const body = document.getElementById('main-body');
+        const wrapper = document.getElementById('app-wrapper');
+        const nav = document.getElementById('navigation-tabs');
+        const footer = document.getElementById('corporate-footer');
+
+        if(activate) {
+            body.className = "bg-slate-950 p-0 m-0 h-full w-full overflow-x-hidden";
+            wrapper.className = "w-full max-w-full p-6 space-y-4";
+            nav.classList.add('hidden');
+            footer.classList.add('hidden');
+            // Inject a quick exit float button header on top of dashboard row
+            const checkHeader = document.getElementById('kds-exit-banner');
+            if(!checkHeader) {
+                const exitBtn = document.createElement('div');
+                exitBtn.id = "kds-exit-banner";
+                exitBtn.className = "bg-slate-900 text-white px-4 py-2 flex justify-between items-center rounded-xl border border-slate-800 text-xs font-bold mb-2";
+                exitBtn.innerHTML = `<span>📺 LIVE EXTREME THEATER MONITORS ACTIVE</span><button onclick="toggleTheaterMode(false)" class="bg-red-600 px-3 py-1 rounded text-white">Exit Fullscreen</button>`;
+                document.getElementById('owner-view').prepend(exitBtn);
+            }
+        } else {
+            body.className = "min-h-full py-6 px-4 font-sans text-slate-800 bg-slate-50";
+            wrapper.className = "mx-auto max-w-md pb-12";
+            nav.classList.remove('hidden');
+            footer.classList.remove('hidden');
+            const exitHeader = document.getElementById('kds-exit-banner');
+            if(exitHeader) exitHeader.remove();
+        }
+    }
+
+    function triggerAdminAuth() {
+        const pin = prompt("Enter Administration Verification PIN:");
+        if (pin === "1234") {
+            switchView('admin');
+            populateAdminForm();
+            generateLiveAppQR();
+        } else {
+            alert("Unauthorized Access. Access Token Invalid.");
+        }
+    }
+
+    function generateLiveAppQR() {
+        const currentTargetURL = window.location.href;
+        document.getElementById('qrcode-url-text').innerText = currentTargetURL;
+        const qrContainer = document.getElementById('qrcode-target');
+        qrContainer.innerHTML = "";
+        qrEngineInstance = new QRCode(qrContainer, {
+            text: currentTargetURL,
+            width: 160,
+            height: 160,
+            colorDark : "#1a337a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }
+
+    function handleBannerUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                systemConfig.bannerBase64 = e.target.result;
+                applyRenderedConfigurations();
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function saveSystemSettings() {
+        systemConfig.upi = document.getElementById('admin-upi').value.trim();
+        systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
+        localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
+        applyRenderedConfigurations();
+        generateLiveAppQR();
+        alert("System branding settings deployed successfully!");
+    }
+
+    function populateAdminForm() {
+        document.getElementById('admin-upi').value = systemConfig.upi;
+        document.getElementById('admin-brand-name').value = systemConfig.brandName;
+    }
+
+    function applyRenderedConfigurations() {
+        document.getElementById('display-brand-name').innerText = systemConfig.brandName;
+        const bannerElement = document.getElementById('hero-banner-container');
+        if (systemConfig.bannerBase64) {
+            bannerElement.style.backgroundImage = `url('${systemConfig.bannerBase64}')`;
+        } else {
+            bannerElement.style.backgroundImage = 'none';
+        }
+    }
+
+    function loadInitialState() {
+        const storedConfig = localStorage.getItem('avit_system_config');
+        if (storedConfig) systemConfig = JSON.parse(storedConfig);
+
+        const storedMenu = localStorage.getItem('avit_menu_items');
+        if (storedMenu) {
+            activeMenu = JSON.parse(storedMenu);
+        } else {
+            activeMenu = [...defaultItems];
+            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+        }
+        
+        applyRenderedConfigurations();
+        renderFrontendMenu();
+        renderAdminMenuList();
+    }
+
+    function renderFrontendMenu() {
+        const list = document.getElementById('customer-menu-list');
+        list.innerHTML = activeMenu.map(item => `
+            <div class="flex items-center justify-between py-4">
+                <div>
+                    <strong class="block text-base font-semibold text-slate-900">${item.name}</strong>
+                    <span class="text-sm font-medium text-slate-500">₹${item.price}</span>
+                </div>
+                <button class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 active:scale-95" onclick="addToCart('${item.name}', ${item.price})">+ Add</button>
+            </div>
+        `).join('');
+    }
+
+    function renderAdminMenuList() {
+        const list = document.getElementById('admin-menu-list');
+        list.innerHTML = activeMenu.map(item => `
+            <div class="flex items-center justify-between py-3">
+                <div>
+                    <span class="font-bold text-slate-900 text-sm">${item.name}</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded ml-2">₹${item.price}</span>
+                </div>
+                <button class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg transition" onclick="deleteMenuItem(${item.id})">Remove</button>
+            </div>
+        `).join('');
+    }
+
+    function addNewMenuItem() {
+        const nameInput = document.getElementById('new-item-name');
+        const priceInput = document.getElementById('new-item-price');
+        const name = nameInput.value.trim();
+        const price = parseInt(priceInput.value);
+
+        if (!name || isNaN(price)) {
+            alert("Please input a valid product name and numerical price!");
+            return;
+        }
+
+        const newItem = { id: Date.now(), name, price };
+        activeMenu.push(newItem);
+        localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+        
+        nameInput.value = '';
+        priceInput.value = '';
+        
+        renderFrontendMenu();
+        renderAdminMenuList();
+    }
+
+    function deleteMenuItem(id) {
+        activeMenu = activeMenu.filter(item => item.id !== id);
+        localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+        renderFrontendMenu();
+        renderAdminMenuList();
+    }
+
+    function addToCart(itemName, price) {
+        currentCart.push(itemName);
+        cartTotal += price;
+        const summary = document.getElementById('cart-summary');
+        summary.className = "mt-5 rounded-xl bg-orange-50 p-3.5 text-center text-sm font-bold text-orange-600 border border-orange-200/60 shadow-inner";
+        summary.innerText = `Total: ₹${cartTotal} (${currentCart.join(', ')})`;
+    }
+
+    function processExpressCheckout() {
+        const nameInput = document.getElementById('custName').value.trim();
+        if (!nameInput) {
+            alert("Please enter your name to complete the order!");
+            return;
+        }
+        if (currentCart.length === 0) {
+            alert("Your cart is empty. Add items before paying.");
+            return;
+        }
+
+        const orderId = Math.floor(1000 + Math.random() * 9000);
+        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
+        const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
+        
+        const newOrder = {
+            id: orderId,
+            customer: nameInput,
+            items: currentCart.join(', '),
+            total: cartTotal,
+            time: timestamp
+        };
+
+        let existingOrders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+        existingOrders.unshift(newOrder);
+        localStorage.setItem('express_orders', JSON.stringify(existingOrders));
+
+        window.dispatchEvent(new Event('storage'));
+        window.location.href = upiIntent;
+
+        currentCart = [];
+        cartTotal = 0;
+        document.getElementById('custName').value = '';
+        const summary = document.getElementById('cart-summary');
+        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200";
+        summary.innerText = 'Cart is empty';
+    }
+
+    function renderOwnerDashboard() {
+        const listContainer = document.getElementById('incoming-orders-list');
+        const orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+
+        if (orders.length === 0) {
+            listContainer.innerHTML = '<p class="py-12 text-center text-sm font-medium text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">Waiting for new orders...</p>';
+            return;
+        }
+
+        const lastAnnounced = localStorage.getItem('last_announced_id');
+        if (orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
+            triggerVocalNotification(orders[0].customer, orders[0].total);
+            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total);
+            localStorage.setItem('last_announced_id', orders[0].id.toString());
+        }
+
+        listContainer.innerHTML = orders.map(order => `
+            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition duration-300 hover:shadow-md">
+                <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
+                    <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.id} — ${order.customer}</span>
+                    <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
+                </div>
+                <div class="my-2.5 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
+                <div class="text-base font-black text-emerald-500 flex items-center gap-1">✓ Payment Received: ₹${order.total}</div>
+            </div>
+        `).join('');
+    }
+
+    function triggerKDSAlertOverlay(name, items, total) {
+        document.getElementById('kds-alert-body').innerHTML = `Name: ${name} <br> Total: ₹${total} <br><br> <span class="text-sm font-normal text-orange-100 font-mono">${items}</span>`;
+        document.getElementById('kds-alert-overlay').classList.remove('hidden');
+    }
+
+    function dismissKDSAlert() {
+        document.getElementById('kds-alert-overlay').classList.add('hidden');
+    }
+
+    function clearAllOrders() {
+        if(confirm("Are you sure you want to completely flush active processing receipts?")) {
+            localStorage.removeItem('express_orders');
+            localStorage.removeItem('last_announced_id');
+            renderOwnerDashboard();
+        }
+    }
+
+    function triggerVocalNotification(name, total) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            const announcement = new SpeechSynthesisUtterance(`Payment received. New order for ${name}. Amount ${total} rupees.`);
+            announcement.lang = 'en-IN'; 
+            announcement.rate = 0.95;
+            window.speechSynthesis.speak(announcement);
+        }
+    }
+
+    window.addEventListener('storage', renderOwnerDashboard);
+    window.addEventListener('DOMContentLoaded', () => {
+        loadInitialState();
+        renderOwnerDashboard();
+    });
+</script>
+</body>
+</html>
