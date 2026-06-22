@@ -124,22 +124,6 @@
             </div>
         </div>
 
-        <!-- AVIT LICENSING MODULE -->
-        <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 p-5 shadow-md border border-slate-800 text-white space-y-3">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">System License</span>
-                <span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider border border-emerald-500/30">Active Tier 1</span>
-            </div>
-            <div>
-                <h4 class="text-lg font-black text-slate-100">AVIT Menu Core Engine</h4>
-                <p class="text-xs text-slate-400 mt-0.5">Provisioned for: <span class="text-slate-200 font-semibold">Laba ChaBora</span></p>
-            </div>
-            <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
-                <div>Billing Cycle: <span class="text-slate-300">Monthly Recurring</span></div>
-                <a href="mailto:avitsolutionstech@gmail.com?subject=Laba%20ChaBora%20License%20Support" class="text-blue-400 font-bold hover:underline">Request Support</a>
-            </div>
-        </div>
-
         <!-- Identity Settings -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
@@ -281,6 +265,27 @@
         }
     }
 
+    function triggerKDSAlertOverlay(name, items, total, notes) {
+        document.getElementById('kds-alert-body').innerHTML = `
+            <div class="text-left leading-relaxed">
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Customer</span><br>
+                <span class="text-3xl">${name}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Cart Items</span><br>
+                <span class="text-xl text-orange-200 font-mono">${items}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Amount</span><br>
+                <span class="text-3xl text-emerald-400 tracking-tight">₹${total}</span>
+            </div>
+            <div class="mt-6 text-sm bg-black/40 p-4 rounded-xl border border-white/20 text-white font-sans text-left">
+                💡 <strong>Customer Note:</strong> ${notes}
+            </div>
+        `;
+        document.getElementById('kds-alert-overlay').classList.remove('hidden');
+    }
+
+    function dismissKDSAlert() { 
+        document.getElementById('kds-alert-overlay').classList.add('hidden'); 
+    }
+
     // ---------------------------------------------------------
     // TAB MEMORY & VIEW SWITCHER
     // ---------------------------------------------------------
@@ -302,16 +307,13 @@
     }
 
     async function loadInitialState() {
-        // 1. Check if this specific device has unlocked the secret dashboard
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
         
         if (isManagerDevice) {
-            // Show tabs and load whatever tab they were on last
             document.getElementById('navigation-tabs').style.display = 'flex';
             const savedTab = localStorage.getItem('avit_active_tab') || 'owner';
             switchView(savedTab);
         } else {
-            // FORCE CUSTOMER MODE: Keep tabs hidden and force to the menu
             switchView('customer');
         }
 
@@ -634,7 +636,6 @@
             localStorage.setItem('express_orders', JSON.stringify(orders));
             renderOwnerDashboard();
             calculateRevenueDashboard();
-            triggerVocalNotification(targetOrder.customer, targetOrder.total, true);
         }
     }
 
@@ -674,6 +675,19 @@
             return;
         }
 
+        // ==========================================
+        // AUDIO & FLASH SECURITY CHECK
+        // ==========================================
+        const lastAnnounced = localStorage.getItem('last_announced_id');
+        const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
+
+        // ONLY fire if this device is unlocked, there are orders, and the top order hasn't been announced yet
+        if (isManagerDevice && orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
+            triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
+            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
+            localStorage.setItem('last_announced_id', orders[0].id.toString());
+        }
+
         listContainer.innerHTML = orders.map(order => `
             <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition flex flex-col justify-between">
                 <div>
@@ -699,27 +713,6 @@
             </div>
         `).join('');
     }
-
-    function triggerKDSAlertOverlay(name, items, total, notes) {
-        document.getElementById('kds-alert-body').innerHTML = `
-            <div class="text-left leading-relaxed">
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Customer</span><br>
-                <span class="text-3xl">${name}</span><br><br>
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Cart Items</span><br>
-                <span class="text-xl text-orange-200 font-mono">${items}</span><br><br>
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Amount</span><br>
-                <span class="text-3xl text-emerald-400 tracking-tight">₹${total}</span>
-            </div>
-            <div class="mt-6 text-sm bg-black/40 p-4 rounded-xl border border-white/20 text-white font-sans text-left">
-                💡 <strong>Customer Note:</strong> ${notes}
-            </div>
-        `;
-        document.getElementById('kds-alert-overlay').classList.remove('hidden');
-    }
-
-    function dismissKDSAlert() { 
-        document.getElementById('kds-alert-overlay').classList.add('hidden'); 
-    }
     
     async function clearAllOrders() {
         if(confirm("Flush order records?")) {
@@ -738,24 +731,8 @@
     // ---------------------------------------------------------
     if (supabase) {
         supabase.channel('custom-all-channel')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
-              const newOrder = payload.new;
-              const parsedItems = Array.isArray(newOrder.items) ? newOrder.items.join(', ') : newOrder.items;
-              
-              // Only trigger alerts if this device is the Owner's unlocked device!
-              if (localStorage.getItem('avit_is_admin_device') === 'true') {
-                  triggerVocalNotification(newOrder.customer, newOrder.total, newOrder.payment_method === 'Cash');
-                  triggerKDSAlertOverlay(newOrder.customer, parsedItems, newOrder.total, newOrder.notes || "None");
-              }
-              
-              await renderOwnerDashboard();
-              await calculateRevenueDashboard();
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, async () => {
-              await renderOwnerDashboard();
-              await calculateRevenueDashboard();
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'orders' }, async () => {
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+              // Now that the brain is back in renderOwnerDashboard, this just tells it to refresh!
               await renderOwnerDashboard();
               await calculateRevenueDashboard();
           })
