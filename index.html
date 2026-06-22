@@ -7,14 +7,25 @@
     <!-- Include Supabase JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = "https://yzklxxmrdditnuotbpdi.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6a2x4eG1yZGRpdG51b3RicGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzQyODAsImV4cCI6MjA5NzY1MDI4MH0.GemWbObKaA7CF48uspAC_hYFaVETYYzv2t226KjEU3M";
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        const SUPABASE_URL = "https://ptegptezjnvnfzeveaxi.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0ZWdwdGV6am52bmZ6ZXZlYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTUzNTcsImV4cCI6MjA5NzY5MTM1N30.wUQNN6vbN1oTL-r3dGQfwqaxJsb1Zo8Fggv3gEWn_Ck";
+        var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
     </script>
     <!-- Include Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Include Local QR Code Generator Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Custom CSS for Emergency KDS Flashing -->
+    <style>
+        @keyframes intense-flash {
+            0%, 100% { background-color: #dc2626; } /* Red */
+            50% { background-color: #ea580c; } /* Orange */
+        }
+        .animate-intense-flash {
+            animation: intense-flash 1.2s infinite;
+        }
+    </style>
 </head>
 <body class="min-h-full py-6 px-4 font-sans text-slate-800 transition-colors duration-300" id="main-body">
 
@@ -200,11 +211,11 @@
 </div>
 
 <!-- HIGH-IMPACT EMERGENCY POPUP BLOCKS -->
-<div id="kds-alert-overlay" class="hidden fixed inset-0 bg-orange-600 z-50 flex flex-col justify-center items-center text-white animate-pulse p-6 text-center">
-    <div class="text-8xl mb-4">🔔</div>
+<div id="kds-alert-overlay" class="hidden fixed inset-0 z-[9999] animate-intense-flash flex flex-col justify-center items-center text-white p-6 text-center shadow-2xl">
+    <div class="text-8xl mb-4 animate-bounce">🔔</div>
     <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
-    <p class="text-2xl font-bold mt-4 bg-black/20 px-6 py-3 rounded-2xl border border-white/20" id="kds-alert-body"></p>
-    <button onclick="dismissKDSAlert()" class="mt-8 bg-white text-orange-600 font-black text-lg px-8 py-4 rounded-xl shadow-2xl tracking-wide">DISMISS ORDER ALERT</button>
+    <p class="text-2xl font-bold mt-4 bg-black/40 px-6 py-4 rounded-2xl border border-white/30 backdrop-blur-sm" id="kds-alert-body"></p>
+    <button onclick="dismissKDSAlert()" class="mt-10 bg-white text-red-600 font-black text-xl px-12 py-5 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.4)] tracking-wider hover:scale-105 active:scale-95 transition-all">DISMISS ORDER ALERT</button>
 </div>
 
 <script>
@@ -216,7 +227,67 @@
     let isTheaterModeActive = false;
     let selectedCategoryFilter = "Tea/Coffee";
 
+    // ---------------------------------------------------------
+    // AUDIO ENGINE UNLOCKER
+    // ---------------------------------------------------------
+    let activeAnnouncer = null;
+    let isAudioEngineUnlocked = false;
+
+    function unlockBrowserAudio() {
+        if (isAudioEngineUnlocked || !('speechSynthesis' in window)) return;
+        const silentPing = new SpeechSynthesisUtterance('');
+        silentPing.volume = 0;
+        window.speechSynthesis.speak(silentPing);
+        isAudioEngineUnlocked = true;
+        document.removeEventListener('click', unlockBrowserAudio);
+        document.removeEventListener('touchstart', unlockBrowserAudio);
+    }
+    
+    document.addEventListener('click', unlockBrowserAudio);
+    document.addEventListener('touchstart', unlockBrowserAudio);
+
+    function triggerVocalNotification(name, total, isCashPayment = false) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.resume(); 
+
+            let phrasing = `Payment received. New order for ${name}. Amount ${total} rupees.`;
+            if (isCashPayment) phrasing = `Payment received via cash for ${name}. Amount ${total} rupees.`;
+            
+            activeAnnouncer = new SpeechSynthesisUtterance(phrasing);
+            activeAnnouncer.lang = 'en-IN'; 
+            activeAnnouncer.rate = 0.95; 
+            activeAnnouncer.volume = 1.0;
+            
+            window.speechSynthesis.speak(activeAnnouncer);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // TAB MEMORY FIX
+    // ---------------------------------------------------------
+    function switchView(viewName) {
+        localStorage.setItem('avit_active_tab', viewName); // Saves your current tab
+        if(isTheaterModeActive) toggleTheaterMode(false);
+        const sections = ['customer', 'owner', 'admin'];
+        sections.forEach(sec => {
+            const el = document.getElementById(`${sec}-view`);
+            const tab = document.getElementById(`tab-${sec}`);
+            if (sec === viewName) {
+                el.classList.remove('hidden');
+                tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
+            } else {
+                el.classList.add('hidden');
+                tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
+            }
+        });
+    }
+
     async function loadInitialState() {
+        // Loads your saved tab on refresh (Fixes Issue 1)
+        const savedTab = localStorage.getItem('avit_active_tab') || 'customer';
+        switchView(savedTab);
+
         const storedConfig = localStorage.getItem('avit_system_config');
         if (storedConfig) systemConfig = JSON.parse(storedConfig);
         applyRenderedConfigurations();
@@ -232,33 +303,9 @@
         }
         
         const storedMenu = localStorage.getItem('avit_menu_items');
-        if (storedMenu) {
-            activeMenu = JSON.parse(storedMenu);
-        } else {
-            activeMenu = [
-                { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
-                { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
-            ];
-            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-        }
+        if (storedMenu) activeMenu = JSON.parse(storedMenu);
         renderFrontendMenu();
         renderAdminMenuList();
-    }
-
-    function switchView(viewName) {
-        if(isTheaterModeActive) toggleTheaterMode(false);
-        const sections = ['customer', 'owner', 'admin'];
-        sections.forEach(sec => {
-            const el = document.getElementById(`${sec}-view`);
-            const tab = document.getElementById(`tab-${sec}`);
-            if (sec === viewName) {
-                el.classList.remove('hidden');
-                tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
-            } else {
-                el.classList.add('hidden');
-                tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
-            }
-        });
     }
 
     function switchMenuCategory(catName) {
@@ -335,28 +382,12 @@
     }
 
     function saveSystemSettings() {
-        const btn = document.getElementById('btn-save-settings');
-        btn.innerText = "⏳ Saving Changes...";
-        btn.disabled = true;
-
-        try {
-            systemConfig.upi = document.getElementById('admin-upi').value.trim();
-            systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
-            localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
-            applyRenderedConfigurations();
-            generateLiveAppQR();
-            
-            btn.innerText = "✅ Core Changes Saved!";
-            setTimeout(() => {
-                btn.innerText = "Save Core Changes";
-                btn.disabled = false;
-            }, 2000);
-            alert("Settings saved successfully!");
-        } catch (err) {
-            btn.innerText = "❌ Save Failed";
-            btn.disabled = false;
-            alert("Failed to save core configurations: " + err.message);
-        }
+        systemConfig.upi = document.getElementById('admin-upi').value.trim();
+        systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
+        localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
+        applyRenderedConfigurations();
+        generateLiveAppQR();
+        alert("Settings saved successfully!");
     }
 
     function populateAdminForm() {
@@ -384,7 +415,6 @@
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         ${item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border bg-slate-100 ${!item.available ? 'grayscale blur-[0.5px]' : ''}">` : `<div class="w-12 h-12 rounded-xl bg-slate-100 border flex items-center justify-center text-xs text-slate-400">🍲</div>`}
-                        ${!item.available ? `<div class="absolute inset-0 bg-red-600/10 rounded-xl flex items-center justify-center"><span class="text-[9px] font-black text-red-600 bg-white px-1 py-0.5 rounded shadow-sm border border-red-200 uppercase tracking-tight scale-90">Not Stock</span></div>` : ''}
                     </div>
                     <div>
                         <strong class="block text-base font-semibold ${!item.available ? 'text-slate-400 line-through' : 'text-slate-900'}">${item.name}</strong>
@@ -417,20 +447,15 @@
 
     async function toggleItemAvailability(id, isChecked) {
         if (supabase) {
-            const { error } = await supabase.from('products').update({ available: isChecked }).eq('id', id);
-            if (!error) {
-                await loadInitialState();
-            } else {
-                alert("Database Update Failed: " + error.message);
-            }
+            await supabase.from('products').update({ available: isChecked }).eq('id', id);
+            await loadInitialState();
             return;
         }
         const item = activeMenu.find(i => i.id === id);
         if(item) {
             item.available = isChecked;
             localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-            renderFrontendMenu();
-            renderAdminMenuList();
+            renderFrontendMenu(); renderAdminMenuList();
         }
     }
 
@@ -439,42 +464,25 @@
         const priceInput = document.getElementById('new-item-price');
         const catSelect = document.getElementById('new-item-category');
         const imgInput = document.getElementById('new-item-image');
-        const btn = document.getElementById('btn-add-product');
-
+        
         const name = nameInput.value.trim();
         const price = parseInt(priceInput.value);
         const category = catSelect.value;
 
-        if (!name || isNaN(price)) {
-            alert("Please input a valid name and price!");
-            return;
-        }
-
-        btn.innerText = "⏳ Saving Product to Database...";
-        btn.disabled = true;
+        if (!name || isNaN(price)) return;
 
         const proceedAndSave = async (base64Img = "") => {
             if (supabase) {
-                const { error } = await supabase.from('products').insert([{ name, price, category, available: true, image: base64Img }]);
-                if (!error) {
-                    nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
-                    btn.innerText = "✅ Saved Successfully!";
-                    await loadInitialState();
-                    setTimeout(() => { btn.innerText = "Add Product To Menu Live"; btn.disabled = false; }, 2000);
-                } else {
-                    btn.innerText = "❌ Save Failed";
-                    btn.disabled = false;
-                    alert("Supabase Error: " + error.message);
-                }
+                await supabase.from('products').insert([{ name, price, category, available: true, image: base64Img }]);
+                nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
+                await loadInitialState();
                 return;
             }
             const newItem = { id: Date.now(), name, price, category, available: true, image: base64Img };
             activeMenu.push(newItem);
             localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
             nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
-            btn.innerText = "✅ Saved Locally!";
             renderFrontendMenu(); renderAdminMenuList();
-            setTimeout(() => { btn.innerText = "Add Product To Menu Live"; btn.disabled = false; }, 2000);
         };
 
         if (imgInput.files && imgInput.files[0]) {
@@ -489,12 +497,8 @@
     async function deleteMenuItem(id) {
         if(confirm("Delete this menu item completely?")) {
             if (supabase) {
-                const { error } = await supabase.from('products').delete().eq('id', id);
-                if (!error) {
-                    await loadInitialState();
-                } else {
-                    alert("Database Deletion Failed: " + error.message);
-                }
+                await supabase.from('products').delete().eq('id', id);
+                await loadInitialState();
                 return;
             }
             activeMenu = activeMenu.filter(item => item.id !== id);
@@ -514,7 +518,7 @@
 
         let total = 0, upi = 0, cash = 0;
         orders.forEach(o => {
-            const amt = o.total || o.total_amount || 0;
+            const amt = parseFloat(o.total || o.total_amount || 0);
             const method = o.payment_method || o.paymentMethod || "UPI Pending";
             total += amt;
             if(method === "Cash") cash += amt;
@@ -548,20 +552,27 @@
         const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
         
         if (supabase) {
+            const jsonCartData = JSON.stringify(currentCart);
+
             const { error } = await supabase.from('orders').insert([{
-                order_number: orderId,
+                order_number: orderId.toString(),
                 customer: nameInput,
                 notes: notesInput || "None",
-                items: currentCart.join(', '),
-                total: cartTotal,
+                items: jsonCartData,
+                total: cartTotal.toString(),
                 payment_method: "UPI Pending"
             }]);
+
             if (!error) {
-                window.location.href = upiIntent;
+                // FORCE A LOCAL STORAGE EVENT SO MULTIPLE TABS ON SAME PC SYNC INSTANTLY (Fixes Issue 2 Backup)
+                localStorage.setItem('avit_force_sync', Date.now().toString());
+
+                alert(`Order #${orderId} Placed Successfully!`);
                 currentCart = []; cartTotal = 0;
                 document.getElementById('custName').value = '';
                 document.getElementById('custNotes').value = '';
                 document.getElementById('cart-summary').innerText = 'Cart is empty';
+                window.location.href = upiIntent;
             } else {
                 alert("Order Dispatch Failed: " + error.message);
             }
@@ -570,10 +581,11 @@
 
         const newOrder = {
             id: orderId,
+            order_number: orderId.toString(),
             customer: nameInput,
             notes: notesInput || "None",
-            items: currentCart.join(', '),
-            total: cartTotal,
+            items: currentCart,
+            total: cartTotal.toString(),
             time: timestamp,
             paymentMethod: "UPI Pending"
         };
@@ -581,27 +593,22 @@
         let existingOrders = JSON.parse(localStorage.getItem('express_orders') || '[]');
         existingOrders.unshift(newOrder);
         localStorage.setItem('express_orders', JSON.stringify(existingOrders));
-
         window.dispatchEvent(new Event('storage'));
-        window.location.href = upiIntent;
 
+        alert(`Order #${orderId} Placed Successfully!`);
         currentCart = []; cartTotal = 0;
         document.getElementById('custName').value = '';
         document.getElementById('custNotes').value = '';
-        const summary = document.getElementById('cart-summary');
-        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200";
-        summary.innerText = 'Cart is empty';
+        document.getElementById('cart-summary').innerText = 'Cart is empty';
+        window.location.href = upiIntent;
     }
 
     async function markOrderAsCash(orderId) {
         if (supabase) {
-            const { error } = await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', orderId);
-            if (!error) {
-                await renderOwnerDashboard();
-                await calculateRevenueDashboard();
-            } else {
-                alert("Failed to modify invoice: " + error.message);
-            }
+            await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', orderId);
+            localStorage.setItem('avit_force_sync', Date.now().toString()); // Sync update across tabs
+            await renderOwnerDashboard();
+            await calculateRevenueDashboard();
             return;
         }
         let orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
@@ -626,10 +633,10 @@
                     id: o.id,
                     order_number: o.order_number || o.id,
                     customer: o.customer,
-                    items: o.items,
+                    items: Array.isArray(o.items) ? o.items.join(', ') : o.items,
                     total: o.total,
                     notes: o.notes || "None",
-                    time: o.created_at ? o.created_at.substring(11,16) : '',
+                    time: o.created_at ? new Date(o.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '',
                     paymentMethod: o.payment_method
                 }));
             }
@@ -638,7 +645,7 @@
                 id: o.id,
                 order_number: o.id,
                 customer: o.customer,
-                items: o.items,
+                items: Array.isArray(o.items) ? o.items.join(', ') : o.items,
                 total: o.total,
                 notes: o.notes || "None",
                 time: o.time,
@@ -686,55 +693,62 @@
 
     function triggerKDSAlertOverlay(name, items, total, notes) {
         document.getElementById('kds-alert-body').innerHTML = `
-            Name: ${name} <br> Total: ₹${total} <br><br> 
-            <span class="text-sm font-normal text-orange-100 font-mono">${items}</span> <br><br>
-            <div class="text-xs bg-black/30 p-3 rounded-xl border border-white/10 text-white font-sans text-left">
+            <div class="text-left leading-relaxed">
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Customer</span><br>
+                <span class="text-3xl">${name}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Cart Items</span><br>
+                <span class="text-xl text-orange-200 font-mono">${items}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Amount</span><br>
+                <span class="text-3xl text-emerald-400 tracking-tight">₹${total}</span>
+            </div>
+            <div class="mt-6 text-sm bg-black/40 p-4 rounded-xl border border-white/20 text-white font-sans text-left">
                 💡 <strong>Customer Note:</strong> ${notes}
             </div>
         `;
         document.getElementById('kds-alert-overlay').classList.remove('hidden');
     }
 
-    function dismissKDSAlert() { document.getElementById('kds-alert-overlay').classList.add('hidden'); }
+    function dismissKDSAlert() { 
+        document.getElementById('kds-alert-overlay').classList.add('hidden'); 
+    }
     
     async function clearAllOrders() {
         if(confirm("Flush order records?")) {
-            if (supabase) {
-                await supabase.from('orders').delete().neq('id', 0);
-            } else {
-                localStorage.removeItem('express_orders');
-            }
+            if (supabase) await supabase.from('orders').delete().neq('id', 0);
+            else localStorage.removeItem('express_orders');
+            
             localStorage.removeItem('last_announced_id');
+            localStorage.setItem('avit_force_sync', Date.now().toString()); // Sync clears across tabs
             await renderOwnerDashboard(); 
             await calculateRevenueDashboard();
         }
     }
 
-    function triggerVocalNotification(name, total, isCashPayment = false) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); 
-            let phrasing = `Payment received. New order for ${name}. Amount ${total} rupees.`;
-            if (isCashPayment) phrasing = `Payment received via cash for ${name}. Amount ${total} rupees.`;
-            const announcement = new SpeechSynthesisUtterance(phrasing);
-            announcement.lang = 'en-IN'; announcement.rate = 0.95; announcement.volume = 1.0;
-            window.speechSynthesis.speak(announcement);
-        }
-    }
-
+    // ---------------------------------------------------------
+    // THE REAL-TIME SYNC BRIDGE
+    // ---------------------------------------------------------
     if (supabase) {
         supabase.channel('custom-all-channel')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
               await renderOwnerDashboard();
               await calculateRevenueDashboard();
           })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-              await loadInitialState();
-          })
           .subscribe();
     }
 
-    window.addEventListener('storage', () => { renderOwnerDashboard(); calculateRevenueDashboard(); });
-    window.addEventListener('DOMContentLoaded', () => { loadInitialState(); renderOwnerDashboard(); });
+    // This listener watches for changes triggered in OTHER tabs on your machine.
+    // If Tab A places an order, Tab B hears this ping and refreshes instantly without you clicking anything.
+    window.addEventListener('storage', async (e) => { 
+        if (e.key === 'avit_force_sync' || e.key === 'express_orders') {
+            await renderOwnerDashboard(); 
+            await calculateRevenueDashboard(); 
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => { 
+        loadInitialState(); 
+        renderOwnerDashboard(); 
+    });
 </script>
 </body>
 </html>
