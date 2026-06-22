@@ -30,8 +30,9 @@
 <body class="min-h-full py-6 px-4 font-sans text-slate-800 transition-colors duration-300" id="main-body">
 
 <div class="mx-auto max-w-md pb-12" id="app-wrapper">
-    <!-- View Switcher Tabs -->
-    <div id="navigation-tabs" class="mb-5 flex gap-1 rounded-xl bg-slate-200 p-1">
+    
+    <!-- View Switcher Tabs (HIDDEN BY DEFAULT FROM CUSTOMERS) -->
+    <div id="navigation-tabs" class="mb-5 gap-1 rounded-xl bg-slate-200 p-1" style="display: none;">
         <button id="tab-customer" class="flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all" onclick="switchView('customer')">📱 Menu</button>
         <button id="tab-owner" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="switchView('owner')">🏪 Orders</button>
         <button id="tab-admin" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="triggerAdminAuth()">⚙️ Admin</button>
@@ -44,7 +45,8 @@
         <div id="hero-banner-container" class="relative overflow-hidden rounded-2xl bg-blue-900 p-6 text-center text-white shadow-md bg-cover bg-center min-h-[140px] flex flex-col justify-center items-center">
             <div class="absolute inset-0 bg-black/40 z-0"></div>
             <div class="relative z-10">
-                <h2 id="display-brand-name" class="text-2xl font-black tracking-tight drop-shadow-sm">Laba ChaBora</h2>
+                <!-- SECRET KNOCK: Tapping this title 5 times unlocks the dashboard -->
+                <h2 id="display-brand-name" class="text-2xl font-black tracking-tight drop-shadow-sm cursor-pointer select-none" onclick="handleSecretClick()">Laba ChaBora</h2>
                 <p class="mt-1 text-sm font-medium text-slate-200 drop-shadow-sm">Scan • Order • Enjoy</p>
             </div>
         </div>
@@ -138,15 +140,6 @@
             </div>
         </div>
 
-        <!-- QR Code Target Container Box -->
-        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
-            <h3 class="text-sm font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
-            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
-                <div id="qrcode-target" class="mx-auto"></div>
-            </div>
-            <div class="text-[10px] font-mono text-slate-400 truncate max-w-full" id="qrcode-url-text"></div>
-        </div>
-
         <!-- Identity Settings -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
@@ -223,9 +216,34 @@
     let activeMenu = [];
     let currentCart = [];
     let cartTotal = 0;
-    let qrEngineInstance = null;
     let isTheaterModeActive = false;
     let selectedCategoryFilter = "Tea/Coffee";
+
+    // ---------------------------------------------------------
+    // THE SECRET KNOCK (PHANTOM DASHBOARD LOGIC)
+    // ---------------------------------------------------------
+    let secretClickCount = 0;
+    let secretClickTimer = null;
+
+    function handleSecretClick() {
+        secretClickCount++;
+        clearTimeout(secretClickTimer);
+        
+        // Reset the count if they don't click fast enough (2 seconds)
+        secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 2000);
+
+        if (secretClickCount === 5) {
+            const pin = prompt("🔐 Enter System PIN to Unlock Dashboard:");
+            if (pin === "1234") {
+                localStorage.setItem('avit_is_admin_device', 'true');
+                document.getElementById('navigation-tabs').style.display = 'flex';
+                alert("Manager Access Unlocked! You can now see the tabs.");
+            } else {
+                alert("❌ Incorrect PIN.");
+            }
+            secretClickCount = 0;
+        }
+    }
 
     // ---------------------------------------------------------
     // AUDIO ENGINE UNLOCKER
@@ -264,10 +282,10 @@
     }
 
     // ---------------------------------------------------------
-    // TAB MEMORY FIX
+    // TAB MEMORY & VIEW SWITCHER
     // ---------------------------------------------------------
     function switchView(viewName) {
-        localStorage.setItem('avit_active_tab', viewName); // Saves your current tab
+        localStorage.setItem('avit_active_tab', viewName); 
         if(isTheaterModeActive) toggleTheaterMode(false);
         const sections = ['customer', 'owner', 'admin'];
         sections.forEach(sec => {
@@ -275,18 +293,27 @@
             const tab = document.getElementById(`tab-${sec}`);
             if (sec === viewName) {
                 el.classList.remove('hidden');
-                tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
+                if(tab) tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
             } else {
                 el.classList.add('hidden');
-                tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
+                if(tab) tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
             }
         });
     }
 
     async function loadInitialState() {
-        // Loads your saved tab on refresh (Fixes Issue 1)
-        const savedTab = localStorage.getItem('avit_active_tab') || 'customer';
-        switchView(savedTab);
+        // 1. Check if this specific device has unlocked the secret dashboard
+        const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
+        
+        if (isManagerDevice) {
+            // Show tabs and load whatever tab they were on last
+            document.getElementById('navigation-tabs').style.display = 'flex';
+            const savedTab = localStorage.getItem('avit_active_tab') || 'owner';
+            switchView(savedTab);
+        } else {
+            // FORCE CUSTOMER MODE: Keep tabs hidden and force to the menu
+            switchView('customer');
+        }
 
         const storedConfig = localStorage.getItem('avit_system_config');
         if (storedConfig) systemConfig = JSON.parse(storedConfig);
@@ -333,7 +360,7 @@
         if(activate) {
             body.className = "bg-slate-950 p-0 m-0 h-full w-full overflow-x-hidden";
             wrapper.className = "w-full max-w-full p-6 space-y-4";
-            nav.classList.add('hidden');
+            nav.style.display = 'none';
             footer.classList.add('hidden');
             const checkHeader = document.getElementById('kds-exit-banner');
             if(!checkHeader) {
@@ -346,7 +373,7 @@
         } else {
             body.className = "min-h-full py-6 px-4 font-sans text-slate-800 bg-slate-50";
             wrapper.className = "mx-auto max-w-md pb-12";
-            nav.classList.remove('hidden');
+            nav.style.display = 'flex';
             footer.classList.remove('hidden');
             const exitHeader = document.getElementById('kds-exit-banner');
             if(exitHeader) exitHeader.remove();
@@ -358,19 +385,10 @@
         if (pin === "1234") {
             switchView('admin');
             populateAdminForm();
-            generateLiveAppQR();
             calculateRevenueDashboard();
         } else {
             alert("Unauthorized Access.");
         }
-    }
-
-    function generateLiveAppQR() {
-        const currentTargetURL = window.location.href;
-        document.getElementById('qrcode-url-text').innerText = currentTargetURL;
-        const qrContainer = document.getElementById('qrcode-target');
-        qrContainer.innerHTML = "";
-        qrEngineInstance = new QRCode(qrContainer, { text: currentTargetURL, width: 140, height: 140, colorDark : "#1a337a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
     }
 
     function handleBannerUpload(input) {
@@ -386,7 +404,6 @@
         systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
         localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
         applyRenderedConfigurations();
-        generateLiveAppQR();
         alert("Settings saved successfully!");
     }
 
@@ -564,7 +581,6 @@
             }]);
 
             if (!error) {
-                // FORCE A LOCAL STORAGE EVENT SO MULTIPLE TABS ON SAME PC SYNC INSTANTLY (Fixes Issue 2 Backup)
                 localStorage.setItem('avit_force_sync', Date.now().toString());
 
                 alert(`Order #${orderId} Placed Successfully!`);
@@ -606,7 +622,7 @@
     async function markOrderAsCash(orderId) {
         if (supabase) {
             await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', orderId);
-            localStorage.setItem('avit_force_sync', Date.now().toString()); // Sync update across tabs
+            localStorage.setItem('avit_force_sync', Date.now().toString()); 
             await renderOwnerDashboard();
             await calculateRevenueDashboard();
             return;
@@ -656,13 +672,6 @@
         if (orders.length === 0) {
             listContainer.innerHTML = '<p class="py-12 text-center text-sm font-medium text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">Waiting for new orders...</p>';
             return;
-        }
-
-        const lastAnnounced = localStorage.getItem('last_announced_id');
-        if (orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
-            triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
-            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
-            localStorage.setItem('last_announced_id', orders[0].id.toString());
         }
 
         listContainer.innerHTML = orders.map(order => `
@@ -718,7 +727,7 @@
             else localStorage.removeItem('express_orders');
             
             localStorage.removeItem('last_announced_id');
-            localStorage.setItem('avit_force_sync', Date.now().toString()); // Sync clears across tabs
+            localStorage.setItem('avit_force_sync', Date.now().toString()); 
             await renderOwnerDashboard(); 
             await calculateRevenueDashboard();
         }
@@ -729,15 +738,33 @@
     // ---------------------------------------------------------
     if (supabase) {
         supabase.channel('custom-all-channel')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
+              const newOrder = payload.new;
+              const parsedItems = Array.isArray(newOrder.items) ? newOrder.items.join(', ') : newOrder.items;
+              
+              // Only trigger alerts if this device is the Owner's unlocked device!
+              if (localStorage.getItem('avit_is_admin_device') === 'true') {
+                  triggerVocalNotification(newOrder.customer, newOrder.total, newOrder.payment_method === 'Cash');
+                  triggerKDSAlertOverlay(newOrder.customer, parsedItems, newOrder.total, newOrder.notes || "None");
+              }
+              
               await renderOwnerDashboard();
               await calculateRevenueDashboard();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, async () => {
+              await renderOwnerDashboard();
+              await calculateRevenueDashboard();
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'orders' }, async () => {
+              await renderOwnerDashboard();
+              await calculateRevenueDashboard();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+              await loadInitialState();
           })
           .subscribe();
     }
 
-    // This listener watches for changes triggered in OTHER tabs on your machine.
-    // If Tab A places an order, Tab B hears this ping and refreshes instantly without you clicking anything.
     window.addEventListener('storage', async (e) => { 
         if (e.key === 'avit_force_sync' || e.key === 'express_orders') {
             await renderOwnerDashboard(); 
