@@ -82,6 +82,12 @@
     <!--            2. OWNER ORDERS VIEW            -->
     <!-- ========================================== -->
     <div id="owner-view" class="hidden space-y-4">
+        
+        <!-- AUDIO OVERRIDE BANNER -->
+        <div id="audio-unlock-warning" class="bg-red-600 text-white p-3 rounded-xl shadow-md text-center font-bold text-sm cursor-pointer animate-pulse" onclick="unlockBrowserAudio()">
+            🔇 ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
+        </div>
+
         <div class="rounded-2xl bg-slate-900 p-6 text-center text-white shadow-md relative">
             <h2 class="text-2xl font-black tracking-tight text-amber-500">Live Counter Dashboard</h2>
             <p class="mt-1 text-sm font-medium text-slate-400">Active Real-Time Requests</p>
@@ -121,6 +127,22 @@
             <div class="rounded-xl bg-amber-50 p-4 shadow-sm border border-amber-100 text-center">
                 <span class="text-[10px] uppercase font-black tracking-wider text-amber-600">Cash Collected</span>
                 <h3 class="text-xl font-black text-amber-700 mt-1" id="stat-cash-revenue">₹0</h3>
+            </div>
+        </div>
+
+        <!-- AVIT LICENSING MODULE -->
+        <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 p-5 shadow-md border border-slate-800 text-white space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">System License</span>
+                <span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider border border-emerald-500/30">Active Tier 1</span>
+            </div>
+            <div>
+                <h4 class="text-lg font-black text-slate-100">AVIT Menu Core Engine</h4>
+                <p class="text-xs text-slate-400 mt-0.5">Provisioned for: <span class="text-slate-200 font-semibold">Laba ChaBora</span></p>
+            </div>
+            <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
+                <div>Billing Cycle: <span class="text-slate-300">Monthly Recurring</span></div>
+                <a href="mailto:avitsolutionstech@gmail.com?subject=Laba%20ChaBora%20License%20Support" class="text-blue-400 font-bold hover:underline">Request Support</a>
             </div>
         </div>
 
@@ -213,7 +235,7 @@
         secretClickCount++;
         clearTimeout(secretClickTimer);
         
-        // Reset the count if they don't click fast enough (2 seconds)
+        // Reset the count if they don't click fast enough
         secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 2000);
 
         if (secretClickCount === 5) {
@@ -230,7 +252,7 @@
     }
 
     // ---------------------------------------------------------
-    // AUDIO ENGINE UNLOCKER
+    // ROCK-SOLID AUDIO ENGINE UNLOCKER
     // ---------------------------------------------------------
     let activeAnnouncer = null;
     let isAudioEngineUnlocked = false;
@@ -241,6 +263,11 @@
         silentPing.volume = 0;
         window.speechSynthesis.speak(silentPing);
         isAudioEngineUnlocked = true;
+        
+        // Hide the warning banner once audio is enabled
+        const warningBanner = document.getElementById('audio-unlock-warning');
+        if (warningBanner) warningBanner.style.display = 'none';
+
         document.removeEventListener('click', unlockBrowserAudio);
         document.removeEventListener('touchstart', unlockBrowserAudio);
     }
@@ -676,13 +703,13 @@
         }
 
         // ==========================================
-        // AUDIO & FLASH SECURITY CHECK
+        // 🚨 BULLETPROOF AUDIO & ALERT LOGIC
         // ==========================================
         const lastAnnounced = localStorage.getItem('last_announced_id');
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
+        const isLookingAtOrdersTab = localStorage.getItem('avit_active_tab') === 'owner' || localStorage.getItem('avit_active_tab') === 'admin';
 
-        // ONLY fire if this device is unlocked, there are orders, and the top order hasn't been announced yet
-        if (isManagerDevice && orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
+        if (isManagerDevice && isLookingAtOrdersTab && orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
             triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
             triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
             localStorage.setItem('last_announced_id', orders[0].id.toString());
@@ -726,13 +753,14 @@
         }
     }
 
-    // ---------------------------------------------------------
-    // THE REAL-TIME SYNC BRIDGE
-    // ---------------------------------------------------------
+    // ==========================================
+    // 📡 100% BULLETPROOF SYNC ENGINE 
+    // ==========================================
+    
+    // Method 1: Supabase Realtime (WebSockets)
     if (supabase) {
         supabase.channel('custom-all-channel')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
-              // Now that the brain is back in renderOwnerDashboard, this just tells it to refresh!
               await renderOwnerDashboard();
               await calculateRevenueDashboard();
           })
@@ -742,6 +770,28 @@
           .subscribe();
     }
 
+    // Method 2: The "Heartbeat" Polling Fallback (Runs every 5 seconds no matter what!)
+    // This absolutely guarantees that even if Supabase Realtime is broken, your laptop will catch the order.
+    setInterval(async () => {
+        const isManager = localStorage.getItem('avit_is_admin_device') === 'true';
+        const isOwnerTab = localStorage.getItem('avit_active_tab') === 'owner' || localStorage.getItem('avit_active_tab') === 'admin';
+        
+        if (isManager && isOwnerTab && supabase) {
+            const { data, error } = await supabase.from('orders').select('*').order('id', { ascending: false }).limit(1);
+            if (!error && data && data.length > 0) {
+                const latestOrder = data[0];
+                const lastAnnounced = localStorage.getItem('last_announced_id');
+                
+                // If the polling heartbeat finds an order that wasn't announced, force a dashboard refresh to trigger the alarm!
+                if (latestOrder.id.toString() !== lastAnnounced) {
+                    await renderOwnerDashboard();
+                    await calculateRevenueDashboard();
+                }
+            }
+        }
+    }, 5000);
+
+    // Method 3: Local Storage Cross-Tab Sync (Backup for non-database setups)
     window.addEventListener('storage', async (e) => { 
         if (e.key === 'avit_force_sync' || e.key === 'express_orders') {
             await renderOwnerDashboard(); 
