@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const SUPABASE_URL = "https://yzklxxmrdditnuotbpdi.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6a2x4eG1yZGRpdG51b3RicGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzQyODAsImV4cCI6MjA5NzY1MDI4MH0.GemWbObKaA7CF48uspAC_hYFaVETYYzv2t226KjEU3M";
-    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-</script>
 <html lang="en" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVIT Express Menu & Counter</title>
+    <!-- Include Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://yzklxxmrdditnuotbpdi.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6a2x4eG1yZGRpdG51b3RicGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzQyODAsImV4cCI6MjA5NzY1MDI4MH0.GemWbObKaA7CF48uspAC_hYFaVETYYzv2t226KjEU3M";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    </script>
     <!-- Include Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Include Local QR Code Generator Engine -->
@@ -54,7 +55,6 @@
                     <label for="custName" class="text-sm font-bold text-slate-700">Your Name *</label>
                     <input type="text" id="custName" placeholder="Enter name for order pickup" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10">
                 </div>
-                <!-- 📝 NEW CUSTOMER NOTES FIELD MODULE -->
                 <div class="space-y-1.5">
                     <label for="custNotes" class="text-sm font-bold text-slate-700">Notes / Requests (Optional)</label>
                     <textarea id="custNotes" rows="2" placeholder="e.g. Extra spicy, Pickup at 6:00 PM, No sugar..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10 resize-none"></textarea>
@@ -151,7 +151,7 @@
                 <label class="text-xs font-bold text-slate-600">Upload Header Banner Image</label>
                 <input type="file" id="admin-banner-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" onchange="handleBannerUpload(this)">
             </div>
-            <button class="w-full bg-slate-900 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-slate-800 transition" onclick="saveSystemSettings()">Save Core Changes</button>
+            <button id="btn-save-settings" class="w-full bg-slate-900 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-slate-800 transition" onclick="saveSystemSettings()">Save Core Changes</button>
         </div>
 
         <!-- DISH CREATOR WITH IMAGE UPLOADER & CATEGORY SELECT -->
@@ -182,7 +182,7 @@
                     </div>
                 </div>
             </div>
-            <button class="w-full bg-purple-600 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-purple-700 transition" onclick="addNewMenuItem()">Add Product To Menu Live</button>
+            <button id="btn-add-product" class="w-full bg-purple-600 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-purple-700 transition" onclick="addNewMenuItem()">Add Product To Menu Live</button>
         </div>
 
         <!-- MASTER INVENTORY LIST CONSOLE -->
@@ -199,7 +199,7 @@
     </div>
 </div>
 
-<!-- HIGH-IMPACT EMERGENCY POPUP BLOCKS (UPDATED FOR NOTES INBOUNDS) -->
+<!-- HIGH-IMPACT EMERGENCY POPUP BLOCKS -->
 <div id="kds-alert-overlay" class="hidden fixed inset-0 bg-orange-600 z-50 flex flex-col justify-center items-center text-white animate-pulse p-6 text-center">
     <div class="text-8xl mb-4">🔔</div>
     <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
@@ -335,12 +335,28 @@
     }
 
     function saveSystemSettings() {
-        systemConfig.upi = document.getElementById('admin-upi').value.trim();
-        systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
-        localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
-        applyRenderedConfigurations();
-        generateLiveAppQR();
-        alert("Settings saved!");
+        const btn = document.getElementById('btn-save-settings');
+        btn.innerText = "⏳ Saving Changes...";
+        btn.disabled = true;
+
+        try {
+            systemConfig.upi = document.getElementById('admin-upi').value.trim();
+            systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
+            localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
+            applyRenderedConfigurations();
+            generateLiveAppQR();
+            
+            btn.innerText = "✅ Core Changes Saved!";
+            setTimeout(() => {
+                btn.innerText = "Save Core Changes";
+                btn.disabled = false;
+            }, 2000);
+            alert("Settings saved successfully!");
+        } catch (err) {
+            btn.innerText = "❌ Save Failed";
+            btn.disabled = false;
+            alert("Failed to save core configurations: " + err.message);
+        }
     }
 
     function populateAdminForm() {
@@ -402,7 +418,11 @@
     async function toggleItemAvailability(id, isChecked) {
         if (supabase) {
             const { error } = await supabase.from('products').update({ available: isChecked }).eq('id', id);
-            if (!error) await loadInitialState();
+            if (!error) {
+                await loadInitialState();
+            } else {
+                alert("Database Update Failed: " + error.message);
+            }
             return;
         }
         const item = activeMenu.find(i => i.id === id);
@@ -419,6 +439,7 @@
         const priceInput = document.getElementById('new-item-price');
         const catSelect = document.getElementById('new-item-category');
         const imgInput = document.getElementById('new-item-image');
+        const btn = document.getElementById('btn-add-product');
 
         const name = nameInput.value.trim();
         const price = parseInt(priceInput.value);
@@ -429,12 +450,21 @@
             return;
         }
 
+        btn.innerText = "⏳ Saving Product to Database...";
+        btn.disabled = true;
+
         const proceedAndSave = async (base64Img = "") => {
             if (supabase) {
                 const { error } = await supabase.from('products').insert([{ name, price, category, available: true, image: base64Img }]);
                 if (!error) {
                     nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
+                    btn.innerText = "✅ Saved Successfully!";
                     await loadInitialState();
+                    setTimeout(() => { btn.innerText = "Add Product To Menu Live"; btn.disabled = false; }, 2000);
+                } else {
+                    btn.innerText = "❌ Save Failed";
+                    btn.disabled = false;
+                    alert("Supabase Error: " + error.message);
                 }
                 return;
             }
@@ -442,7 +472,9 @@
             activeMenu.push(newItem);
             localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
             nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
+            btn.innerText = "✅ Saved Locally!";
             renderFrontendMenu(); renderAdminMenuList();
+            setTimeout(() => { btn.innerText = "Add Product To Menu Live"; btn.disabled = false; }, 2000);
         };
 
         if (imgInput.files && imgInput.files[0]) {
@@ -455,14 +487,20 @@
     }
 
     async function deleteMenuItem(id) {
-        if (supabase) {
-            const { error } = await supabase.from('products').delete().eq('id', id);
-            if (!error) await loadInitialState();
-            return;
+        if(confirm("Delete this menu item completely?")) {
+            if (supabase) {
+                const { error } = await supabase.from('products').delete().eq('id', id);
+                if (!error) {
+                    await loadInitialState();
+                } else {
+                    alert("Database Deletion Failed: " + error.message);
+                }
+                return;
+            }
+            activeMenu = activeMenu.filter(item => item.id !== id);
+            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+            renderFrontendMenu(); renderAdminMenuList();
         }
-        activeMenu = activeMenu.filter(item => item.id !== id);
-        localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-        renderFrontendMenu(); renderAdminMenuList();
     }
 
     async function calculateRevenueDashboard() {
@@ -524,6 +562,8 @@
                 document.getElementById('custName').value = '';
                 document.getElementById('custNotes').value = '';
                 document.getElementById('cart-summary').innerText = 'Cart is empty';
+            } else {
+                alert("Order Dispatch Failed: " + error.message);
             }
             return;
         }
@@ -559,6 +599,8 @@
             if (!error) {
                 await renderOwnerDashboard();
                 await calculateRevenueDashboard();
+            } else {
+                alert("Failed to modify invoice: " + error.message);
             }
             return;
         }
