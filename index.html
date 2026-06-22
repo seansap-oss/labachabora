@@ -38,7 +38,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!--            1. CUSTOMER VIEW                -->
+    <!--            1. CUSTOMER MENU VIEW           -->
     <!-- ========================================== -->
     <div id="customer-view" class="space-y-4">
         <div id="hero-banner-container" class="relative overflow-hidden rounded-2xl bg-blue-900 p-6 text-center text-white shadow-md bg-cover bg-center min-h-[140px] flex flex-col justify-center items-center">
@@ -55,18 +55,16 @@
             <button id="cat-tab-food" onclick="switchMenuCategory('Food')" class="pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all">🍔 Food Items</button>
         </div>
 
-        <!-- Live Menu Items Container -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
             <div id="customer-menu-list" class="divide-y divide-slate-100"></div>
         </div>
 
-        <!-- PROFESSIONAL CHECKOUT BOX -->
+        <!-- RE-ENGINEERED CART WRAPPER -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-5">
             <h3 class="text-lg font-black text-slate-900 tracking-tight">Your Selection</h3>
             
-            <!-- Professional Row-by-Row Cart Item Display -->
             <div id="pro-cart-container" class="divide-y divide-slate-100 max-h-[280px] overflow-y-auto pr-1">
-                <!-- Rows injected dynamically via JavaScript -->
+                <!-- Cart rows stream here organically -->
             </div>
 
             <div class="space-y-3 pt-2 border-t">
@@ -80,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- Grand Total Breakdown Card -->
             <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm font-bold">
                 <span class="text-slate-500">Amount Payable</span>
                 <span class="text-xl font-black text-blue-900" id="pro-cart-grand-total">₹0</span>
@@ -93,11 +90,49 @@
     </div>
 
     <!-- ========================================== -->
+    <!--            1.5 CLIENT DYNAMIC QR HUB       -->
+    <!-- ========================================== -->
+    <div id="payment-view" class="hidden space-y-4">
+        <div class="rounded-2xl bg-white p-6 shadow-sm border border-slate-100 text-center">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">💸</div>
+            <h2 class="text-xl font-black text-slate-900">Scan & Complete Transfer</h2>
+            <p class="text-sm text-slate-500 mt-1 mb-6">Order ID: <span id="pay-order-id" class="font-bold text-slate-800"></span> • Amount: <span class="font-black text-emerald-600">₹<span id="pay-amount"></span></span></p>
+
+            <div class="p-4 bg-slate-100 rounded-2xl inline-block mb-6 shadow-inner border border-slate-200/40">
+                <div id="checkout-qrcode" class="mx-auto"></div>
+            </div>
+
+            <div class="space-y-2.5 max-w-xs mx-auto text-left mb-6">
+                <div class="flex items-start gap-2.5 text-xs text-slate-600 font-medium">
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black shrink-0">1</span>
+                    <p>Scan the code above using <strong>BHIM, GPay, PhonePe, or Paytm</strong>.</p>
+                </div>
+                <div class="flex items-start gap-2.5 text-xs text-slate-600 font-medium">
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black shrink-0">2</span>
+                    <p>Complete the transaction securely on your mobile application.</p>
+                </div>
+            </div>
+
+            <a id="mobile-pay-btn" href="#" class="block w-full rounded-xl bg-blue-900 py-3.5 text-center text-sm font-bold text-white shadow-sm mb-4 hover:bg-blue-800 active:scale-95 transition-all">
+                📱 Click Here to Pay via Mobile App
+            </a>
+
+            <button class="w-full rounded-xl bg-slate-100 text-slate-500 py-3.5 text-center text-sm font-bold hover:bg-slate-200 transition-all" onclick="returnToMenuAfterCheckout()">
+                ✓ Done, Return to Menu
+            </button>
+            
+            <p class="text-[10px] font-medium text-slate-400 mt-4 leading-relaxed">
+                Your order is safely staged at the counter. Inform the cashier once your screen displays payment confirmation.
+            </p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!--            2. OWNER ORDERS VIEW            -->
     <!-- ========================================== -->
     <div id="owner-view" class="hidden space-y-4">
         <div id="audio-unlock-warning" class="bg-red-600 text-white p-3 rounded-xl shadow-md text-center font-bold text-sm cursor-pointer animate-pulse" onclick="unlockBrowserAudio()">
-            🔇 ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
+            * ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
         </div>
 
         <div class="rounded-2xl bg-slate-900 p-6 text-center text-white shadow-md relative">
@@ -122,7 +157,6 @@
             <p class="mt-1 text-sm font-medium text-slate-400">Manage Branding & Menu Ecosystem</p>
         </div>
 
-        <!-- ANALYTICS CARDS -->
         <div class="grid grid-cols-2 gap-2">
             <div class="rounded-xl bg-white p-4 shadow-sm border border-slate-100 text-center">
                 <span class="text-[10px] uppercase font-black tracking-wider text-slate-400">Total Revenue</span>
@@ -142,7 +176,6 @@
             </div>
         </div>
 
-        <!-- QR Code Target Container Box -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
             <h3 class="text-sm font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
             <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
@@ -151,7 +184,6 @@
             <div class="text-[10px] font-mono text-slate-400 truncate max-w-full" id="qrcode-url-text"></div>
         </div>
 
-        <!-- Core Configs -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
             <div class="space-y-1">
@@ -169,7 +201,6 @@
             <button id="btn-save-settings" class="w-full bg-slate-900 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-slate-800 transition" onclick="saveSystemSettings()">Save Core Changes</button>
         </div>
 
-        <!-- DISH CREATOR WITH IMAGE UPLOADER & CATEGORY SELECT -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">2. Add New Menu Dish</h3>
             <div class="space-y-3">
@@ -200,21 +231,18 @@
             <button id="btn-add-product" class="w-full bg-purple-600 text-white rounded-xl py-2.5 text-sm font-bold shadow hover:bg-purple-700 transition" onclick="addNewMenuItem()">Add Product To Menu Live</button>
         </div>
 
-        <!-- MASTER INVENTORY LIST CONSOLE -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
             <h3 class="mb-3 text-base font-bold text-slate-900 tracking-tight border-b pb-2">3. Current Active Products & Stock Status</h3>
             <div id="admin-menu-list" class="divide-y divide-slate-100"></div>
         </div>
     </div>
 
-    <!-- Corporate Footer Placement -->
     <div id="corporate-footer" class="mt-10 border-t border-slate-200 pt-5 text-center text-xs leading-relaxed text-slate-400 font-medium">
         Digital Menu Ecosystem by AVIT Solutions — From Code to Completion<br>
         <span class="text-slate-500">Support: avitsolutionstech@gmail.com | Sales: +91 7005476148</span>
     </div>
 </div>
 
-<!-- HIGH-IMPACT EMERGENCY POPUP BLOCKS -->
 <div id="kds-alert-overlay" class="hidden fixed inset-0 z-[9999] animate-intense-flash flex flex-col justify-center items-center text-white p-6 text-center shadow-2xl">
     <div class="text-8xl mb-4 animate-bounce">🔔</div>
     <h1 class="text-4xl font-black tracking-tight uppercase" id="kds-alert-title">New Order Inbound!</h1>
@@ -225,16 +253,13 @@
 <script>
     let systemConfig = { upi: "devranakitchen@okaxis", brandName: "Laba ChaBora", bannerBase64: "" };
     let activeMenu = [];
-    
-    // PROFESSIONAL STRUCTURAL CART: Holds objects tracking quantity { name, price, qty, image }
     let currentCart = [];
     let cartTotal = 0;
-    
     let isTheaterModeActive = false;
     let selectedCategoryFilter = "Tea/Coffee";
 
     // ---------------------------------------------------------
-    // SECRET DASHBOARD ACCESS HANDLER
+    // THE SECRET KNOCK (PHANTOM DASHBOARD SECURITY)
     // ---------------------------------------------------------
     let secretClickCount = 0;
     let secretClickTimer = null;
@@ -259,7 +284,7 @@
     }
 
     // ---------------------------------------------------------
-    // AUDIO ENGINE WRAPPERS
+    // AUDIO ENGINE CORE MANAGEMENT
     // ---------------------------------------------------------
     let activeAnnouncer = null;
     let isAudioEngineUnlocked = false;
@@ -298,22 +323,46 @@
         }
     }
 
+    function triggerKDSAlertOverlay(name, items, total, notes) {
+        document.getElementById('kds-alert-body').innerHTML = `
+            <div class="text-left leading-relaxed">
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Customer</span><br>
+                <span class="text-3xl">${name}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Cart Items</span><br>
+                <span class="text-xl text-orange-200 font-mono">${items}</span><br><br>
+                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Amount</span><br>
+                <span class="text-3xl text-emerald-400 tracking-tight">₹${total}</span>
+            </div>
+            <div class="mt-6 text-sm bg-black/40 p-4 rounded-xl border border-white/20 text-white font-sans text-left">
+                💡 <strong>Customer Note:</strong> ${notes}
+            </div>
+        `;
+        document.getElementById('kds-alert-overlay').classList.remove('hidden');
+    }
+
+    function dismissKDSAlert() { 
+        document.getElementById('kds-alert-overlay').classList.add('hidden'); 
+    }
+
     // ---------------------------------------------------------
-    // APPLICATION ARCHITECTURE CORE
+    // CONTAINER ROUTING VIEW HANDLERS
     // ---------------------------------------------------------
     function switchView(viewName) {
         localStorage.setItem('avit_active_tab', viewName); 
         if(isTheaterModeActive) toggleTheaterMode(false);
-        const sections = ['customer', 'owner', 'admin'];
+        const sections = ['customer', 'payment', 'owner', 'admin'];
         sections.forEach(sec => {
             const el = document.getElementById(`${sec}-view`);
             const tab = document.getElementById(`tab-${sec}`);
-            if (sec === viewName) {
-                el.classList.remove('hidden');
-                if(tab) tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
-            } else {
-                el.classList.add('hidden');
-                if(tab) tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
+            
+            if (el) {
+                if (sec === viewName) {
+                    el.classList.remove('hidden');
+                    if(tab) tab.className = "flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all";
+                } else {
+                    el.classList.add('hidden');
+                    if(tab) tab.className = "flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50";
+                }
             }
         });
     }
@@ -560,10 +609,10 @@
         let total = 0, upi = 0, cash = 0;
         orders.forEach(o => {
             const amt = parseFloat(o.total || 0);
-            const method = o.payment_method || "UPI Pending";
+            const method = o.payment_method || "Pending";
             total += amt;
             if(method === "Cash") cash += amt;
-            else upi += amt;
+            else if(method === "Verified UPI") upi += amt;
         });
         document.getElementById('stat-total-revenue').innerText = `₹${total}`;
         document.getElementById('stat-total-orders').innerText = orders.length;
@@ -571,9 +620,6 @@
         document.getElementById('stat-cash-revenue').innerText = `₹${cash}`;
     }
 
-    // ---------------------------------------------------------
-    // RE-ENGINEERED CHECKOUT ARCHITECTURE & QUANTITY ADJUSTMENT
-    // ---------------------------------------------------------
     function addToCart(itemName, price, image) {
         const existingItem = currentCart.find(item => item.name === itemName);
         if (existingItem) {
@@ -627,7 +673,6 @@
                 </div>
                 
                 <div class="flex items-center gap-4">
-                    <!-- Quantity Box -->
                     <div class="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200/50">
                         <button onclick="modifyQty('${item.name}', -1)" class="w-7 h-7 flex items-center justify-center text-sm font-black text-slate-600 hover:bg-white rounded-md transition-all active:scale-90">−</button>
                         <span class="w-8 text-center text-sm font-bold text-slate-800">${item.qty}</span>
@@ -636,7 +681,7 @@
                     
                     <div class="text-right min-w-[60px]">
                         <span class="block text-sm font-extrabold text-slate-900">₹${item.price * item.qty}</span>
-                        <button onclick="removeItemFromCart('${item.name}')" class="text-[10px] font-bold text-red-500 hover:underline">Remove</button>
+                        <button onclick="removeItemFromCart('${item.name}')" class="text-xs font-bold text-red-500 hover:underline block text-right mt-0.5">Remove</button>
                     </div>
                 </div>
             </div>
@@ -644,7 +689,7 @@
     }
 
     // ---------------------------------------------------------
-    // THE ADVANCED PAYMENT PROOF SUBMITTER
+    // DUAL-GATE STAGING ENGINE (ZERO ACCIDENTAL ALARMS)
     // ---------------------------------------------------------
     async function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
@@ -654,59 +699,83 @@
         if (!nameInput) { alert("Please enter your name!"); return; }
         if (currentCart.length === 0) { alert("Your cart is empty."); return; }
 
-        // 1. Visually lock the submit button so the user knows it's executing
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "Processing Payment Intent...";
-        btnSubmit.className = "mt-4 w-full rounded-xl bg-slate-400 py-4 text-center text-base font-bold text-white cursor-not-allowed transition";
+        btnSubmit.innerText = "Staging Order Record...";
 
         const orderId = Math.floor(1000 + Math.random() * 9000);
         const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
         const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
         
         if (supabase) {
-            // Flatten the cart format into structural rows for kitchen reading
             const arrayItemsFlattened = currentCart.map(i => `${i.name} (x${i.qty})`);
             const jsonCartData = JSON.stringify(arrayItemsFlattened);
 
-            const { error } = await supabase.from('orders').insert([{
+            // Gate 1: Save silently as 'Pending Verification'
+            const { data, error } = await supabase.from('orders').insert([{
                 order_number: orderId.toString(),
                 customer: nameInput,
                 notes: notesInput || "None",
                 items: jsonCartData,
                 total: cartTotal.toString(),
-                payment_method: "UPI Pending" // Saved explicitly as pending!
-            }]);
+                payment_method: "Pending Verification" 
+            }]).select();
 
-            if (!error) {
-                // Trigger local synchronization handshake
-                localStorage.setItem('avit_force_sync', Date.now().toString());
+            if (!error && data && data.length > 0) {
+                // Initialize the structural Payment Gateway View components
+                document.getElementById('pay-order-id').innerText = orderId;
+                document.getElementById('pay-amount').innerText = cartTotal;
+                document.getElementById('mobile-pay-btn').href = upiIntent;
 
-                // 2. Clear out the fields and state gracefully AFTER successful database logging
+                document.getElementById('checkout-qrcode').innerHTML = "";
+                new QRCode(document.getElementById('checkout-qrcode'), {
+                    text: upiIntent,
+                    width: 180,
+                    height: 180,
+                    colorDark : "#1e3a8a",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                // Clear customer checkout form cleanly
                 currentCart = [];
                 renderProfessionalCart();
                 document.getElementById('custName').value = '';
                 document.getElementById('custNotes').value = '';
 
-                // Restore checkout button format back to active
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = "Proceed & Pay via UPI";
-                btnSubmit.className = "mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98]";
-
-                // 3. Launch UPI intent app window
-                window.location.href = upiIntent;
+                
+                // Shift focus to the dedicated gateway screen
+                switchView('payment');
+                localStorage.setItem('avit_force_sync', Date.now().toString());
             } else {
                 alert("Order Dispatch Failed: " + error.message);
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = "Proceed & Pay via UPI";
-                btnSubmit.className = "mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white id='btn-submit-order'";
             }
         }
     }
 
-    async function markOrderAsCash(orderId) {
+    function returnToMenuAfterCheckout() {
+        switchView('customer');
+    }
+
+    // Cashier triggers this when approving the transaction on the counter laptop
+    async function counterApproveUPI(dbId) {
         if (supabase) {
-            await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', orderId);
-            localStorage.setItem('avit_force_sync', Date.now().toString()); 
+            // Gate 2: Elevate status to 'Verified UPI' to trigger the alarms
+            await supabase.from('orders').update({ payment_method: 'Verified UPI' }).eq('id', dbId);
+            localStorage.setItem('avit_force_sync', Date.now().toString());
+            await renderOwnerDashboard();
+            await calculateRevenueDashboard();
+        }
+    }
+
+    async function counterApproveCash(dbId) {
+        if (supabase) {
+            // Gate 2: Elevate status to 'Cash' to trigger the alarms
+            await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', dbId);
+            localStorage.setItem('avit_force_sync', Date.now().toString());
             await renderOwnerDashboard();
             await calculateRevenueDashboard();
         }
@@ -737,25 +806,35 @@
             return;
         }
 
-        // =======================================================
-        // 🚨 CRITICAL CRITERIA: ONLY SOUND THE ALARM AFTER METHOD RISES
-        // =======================================================
-        const lastAnnounced = localStorage.getItem('last_announced_id');
+        // ==========================================
+        // DUAL-GATE ALARM TRIGGER HANDSHAKE
+        // ==========================================
+        let announcedList = (localStorage.getItem('avit_announced_orders') || '').split(',').filter(Boolean);
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
         const isLookingAtOrdersTab = localStorage.getItem('avit_active_tab') === 'owner' || localStorage.getItem('avit_active_tab') === 'admin';
 
-        // CRITICAL BUG FIX: Only trigger the intense flashing strobe and sound engine 
-        // if the status is paid ("Cash") OR if a new verified state updates. It no longer flashes for "UPI Pending"!
-        if (isManagerDevice && isLookingAtOrdersTab && orders.length > 0 && orders[0].paymentMethod !== "UPI Pending" && orders[0].id.toString() !== lastAnnounced) {
-            triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
-            triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
-            localStorage.setItem('last_announced_id', orders[0].id.toString());
+        if (isManagerDevice && isLookingAtOrdersTab) {
+            for (let order of orders) {
+                // The alert ONLY fires if the status is explicitly upgraded by the counter cashier
+                if ((order.paymentMethod === 'Verified UPI' || order.paymentMethod === 'Cash') && !announcedList.includes(order.id.toString())) {
+                    triggerVocalNotification(order.customer, order.total, order.paymentMethod === 'Cash');
+                    triggerKDSAlertOverlay(order.customer, order.items, order.total, order.notes);
+
+                    announcedList.push(order.id.toString());
+                    if (announcedList.length > 50) announcedList.shift(); 
+                    localStorage.setItem('avit_announced_orders', announcedList.join(','));
+                    break; 
+                }
+            }
         }
 
-        listContainer.innerHTML = orders.map(order => `
-            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 ${order.paymentMethod === 'UPI Pending' ? 'border-amber-400' : 'border-emerald-500'} shadow-sm transition flex flex-col justify-between">
+        listContainer.innerHTML = orders.map(order => {
+            const isUnverified = order.paymentMethod === 'Pending Verification';
+            
+            return `
+            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 ${isUnverified ? 'border-amber-500 animate-pulse' : 'border-emerald-500'} shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
+                    <div class="flex items-center justify-between text-sm font-bold">
                         <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.order_number} — ${order.customer}</span>
                         <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
                     </div>
@@ -764,24 +843,30 @@
                         📌 <strong>Notes:</strong> ${order.notes}
                     </div>
                 </div>
-                <div class="mt-2 pt-2 border-t border-dashed border-slate-200/60 flex items-center justify-between">
-                    <div class="text-base font-black ${order.paymentMethod === 'UPI Pending' ? 'text-amber-600' : 'text-emerald-600'}">
-                        Status: ${order.paymentMethod === 'UPI Pending' ? '⏳ Customer App Opening (Pending)' : `✓ Collected: ₹${order.total} (${order.paymentMethod})`}
+                <div class="mt-4 pt-3 border-t border-dashed border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="text-sm font-black ${isUnverified ? 'text-amber-600' : 'text-emerald-600'}">
+                        ${isUnverified ? '🛎️ Staged: Check Bank App or Screenshot' : `✓ Approved: ₹${order.total} (${order.paymentMethod})`}
                     </div>
-                    ${order.paymentMethod === 'UPI Pending' ? `
-                        <button onclick="markOrderAsCash(${order.id})" class="text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-xl shadow-sm transition">
-                            💵 Accept Cash & Complete Order
-                        </button>
+                    ${isUnverified ? `
+                        <div class="flex gap-2">
+                            <button onclick="counterApproveCash(${order.id})" class="text-xs bg-slate-900 text-white px-3 py-2 rounded-xl font-bold shadow-sm hover:bg-slate-800 transition-all">
+                                💵 Cash Paid
+                            </button>
+                            <button onclick="counterApproveUPI(${order.id})" class="text-xs bg-emerald-600 text-white px-4 py-2 rounded-xl font-black shadow-sm hover:bg-emerald-700 transition-all">
+                                ⚡ UPI Received
+                            </button>
+                        </div>
                     ` : ''}
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
     
     async function clearAllOrders() {
         if(confirm("Flush order records?")) {
             if (supabase) await supabase.from('orders').delete().neq('id', 0);
-            localStorage.removeItem('last_announced_id');
+            localStorage.removeItem('avit_announced_orders');
             localStorage.setItem('avit_force_sync', Date.now().toString()); 
             await renderOwnerDashboard(); 
             await calculateRevenueDashboard();
@@ -789,7 +874,7 @@
     }
 
     // ---------------------------------------------------------
-    // SYSTEM LIFECYCLE CHANNELS
+    // PIPELINE INTERFACE REALTIME MANAGEMENT
     // ---------------------------------------------------------
     if (supabase) {
         supabase.channel('custom-all-channel')
@@ -811,9 +896,9 @@
             const { data, error } = await supabase.from('orders').select('*').order('id', { ascending: false }).limit(1);
             if (!error && data && data.length > 0) {
                 const latestOrder = data[0];
-                const lastAnnounced = localStorage.getItem('last_announced_id');
+                const announcedList = (localStorage.getItem('avit_announced_orders') || '').split(',');
                 
-                if (latestOrder.id.toString() !== lastAnnounced && latestOrder.payment_method !== "UPI Pending") {
+                if (!announcedList.includes(latestOrder.id.toString()) && latestOrder.payment_method !== "Pending Verification") {
                     await renderOwnerDashboard();
                     await calculateRevenueDashboard();
                 }
@@ -822,7 +907,7 @@
     }, 5000);
 
     window.addEventListener('storage', async (e) => { 
-        if (e.key === 'avit_force_sync' || e.key === 'express_orders') {
+        if (e.key === 'avit_force_sync') {
             await renderOwnerDashboard(); 
             await calculateRevenueDashboard(); 
         }
