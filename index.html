@@ -16,11 +16,10 @@
     <!-- Include Local QR Code Generator Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
-    <!-- Custom CSS for Emergency KDS Flashing -->
     <style>
         @keyframes intense-flash {
-            0%, 100% { background-color: #dc2626; } /* Red */
-            50% { background-color: #ea580c; } /* Orange */
+            0%, 100% { background-color: #dc2626; }
+            50% { background-color: #ea580c; }
         }
         .animate-intense-flash {
             animation: intense-flash 1.2s infinite;
@@ -45,7 +44,6 @@
         <div id="hero-banner-container" class="relative overflow-hidden rounded-2xl bg-blue-900 p-6 text-center text-white shadow-md bg-cover bg-center min-h-[140px] flex flex-col justify-center items-center">
             <div class="absolute inset-0 bg-black/40 z-0"></div>
             <div class="relative z-10">
-                <!-- SECRET KNOCK: Tapping this title 5 times unlocks the dashboard -->
                 <h2 id="display-brand-name" class="text-2xl font-black tracking-tight drop-shadow-sm cursor-pointer select-none" onclick="handleSecretClick()">Laba ChaBora</h2>
                 <p class="mt-1 text-sm font-medium text-slate-200 drop-shadow-sm">Scan • Order • Enjoy</p>
             </div>
@@ -57,24 +55,40 @@
             <button id="cat-tab-food" onclick="switchMenuCategory('Food')" class="pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all">🍔 Food Items</button>
         </div>
 
+        <!-- Live Menu Items Container -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
             <div id="customer-menu-list" class="divide-y divide-slate-100"></div>
         </div>
 
-        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-            <h3 class="mb-4 text-lg font-bold text-slate-900 tracking-tight">Checkout Details</h3>
-            <div class="space-y-3">
+        <!-- PROFESSIONAL CHECKOUT BOX -->
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-5">
+            <h3 class="text-lg font-black text-slate-900 tracking-tight">Your Selection</h3>
+            
+            <!-- Professional Row-by-Row Cart Item Display -->
+            <div id="pro-cart-container" class="divide-y divide-slate-100 max-h-[280px] overflow-y-auto pr-1">
+                <!-- Rows injected dynamically via JavaScript -->
+            </div>
+
+            <div class="space-y-3 pt-2 border-t">
                 <div class="space-y-1.5">
                     <label for="custName" class="text-sm font-bold text-slate-700">Your Name *</label>
                     <input type="text" id="custName" placeholder="Enter name for order pickup" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10">
                 </div>
                 <div class="space-y-1.5">
                     <label for="custNotes" class="text-sm font-bold text-slate-700">Notes / Requests (Optional)</label>
-                    <textarea id="custNotes" rows="2" placeholder="e.g. Extra spicy, Pickup at 6:00 PM, No sugar..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10 resize-none"></textarea>
+                    <textarea id="custNotes" rows="2" placeholder="e.g. Extra spicy, No sugar..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none transition focus:border-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-900/10 resize-none"></textarea>
                 </div>
             </div>
-            <div id="cart-summary" class="mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200">Cart is empty</div>
-            <button class="mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98]" onclick="processExpressCheckout()">Proceed & Pay via UPI</button>
+
+            <!-- Grand Total Breakdown Card -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm font-bold">
+                <span class="text-slate-500">Amount Payable</span>
+                <span class="text-xl font-black text-blue-900" id="pro-cart-grand-total">₹0</span>
+            </div>
+
+            <button id="btn-submit-order" class="w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed" onclick="processExpressCheckout()">
+                Proceed & Pay via UPI
+            </button>
         </div>
     </div>
 
@@ -82,8 +96,6 @@
     <!--            2. OWNER ORDERS VIEW            -->
     <!-- ========================================== -->
     <div id="owner-view" class="hidden space-y-4">
-        
-        <!-- AUDIO OVERRIDE BANNER -->
         <div id="audio-unlock-warning" class="bg-red-600 text-white p-3 rounded-xl shadow-md text-center font-bold text-sm cursor-pointer animate-pulse" onclick="unlockBrowserAudio()">
             🔇 ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
         </div>
@@ -110,7 +122,7 @@
             <p class="mt-1 text-sm font-medium text-slate-400">Manage Branding & Menu Ecosystem</p>
         </div>
 
-        <!-- REAL-TIME REVENUE ANALYTICS DASHBOARD -->
+        <!-- ANALYTICS CARDS -->
         <div class="grid grid-cols-2 gap-2">
             <div class="rounded-xl bg-white p-4 shadow-sm border border-slate-100 text-center">
                 <span class="text-[10px] uppercase font-black tracking-wider text-slate-400">Total Revenue</span>
@@ -130,23 +142,16 @@
             </div>
         </div>
 
-        <!-- AVIT LICENSING MODULE -->
-        <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 p-5 shadow-md border border-slate-800 text-white space-y-3">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold tracking-widest text-blue-400 uppercase">System License</span>
-                <span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-black text-emerald-400 uppercase tracking-wider border border-emerald-500/30">Active Tier 1</span>
+        <!-- QR Code Target Container Box -->
+        <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
+            <h3 class="text-sm font-black text-slate-900 tracking-tight">🎯 Counter Scan QR Code</h3>
+            <div class="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                <div id="qrcode-target" class="mx-auto"></div>
             </div>
-            <div>
-                <h4 class="text-lg font-black text-slate-100">AVIT Menu Core Engine</h4>
-                <p class="text-xs text-slate-400 mt-0.5">Provisioned for: <span class="text-slate-200 font-semibold">Laba ChaBora</span></p>
-            </div>
-            <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs text-slate-400 font-medium">
-                <div>Billing Cycle: <span class="text-slate-300">Monthly Recurring</span></div>
-                <a href="mailto:avitsolutionstech@gmail.com?subject=Laba%20ChaBora%20License%20Support" class="text-blue-400 font-bold hover:underline">Request Support</a>
-            </div>
+            <div class="text-[10px] font-mono text-slate-400 truncate max-w-full" id="qrcode-url-text"></div>
         </div>
 
-        <!-- Identity Settings -->
+        <!-- Core Configs -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
             <div class="space-y-1">
@@ -220,13 +225,16 @@
 <script>
     let systemConfig = { upi: "devranakitchen@okaxis", brandName: "Laba ChaBora", bannerBase64: "" };
     let activeMenu = [];
+    
+    // PROFESSIONAL STRUCTURAL CART: Holds objects tracking quantity { name, price, qty, image }
     let currentCart = [];
     let cartTotal = 0;
+    
     let isTheaterModeActive = false;
     let selectedCategoryFilter = "Tea/Coffee";
 
     // ---------------------------------------------------------
-    // THE SECRET KNOCK (PHANTOM DASHBOARD LOGIC)
+    // SECRET DASHBOARD ACCESS HANDLER
     // ---------------------------------------------------------
     let secretClickCount = 0;
     let secretClickTimer = null;
@@ -234,8 +242,6 @@
     function handleSecretClick() {
         secretClickCount++;
         clearTimeout(secretClickTimer);
-        
-        // Reset the count if they don't click fast enough
         secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 2000);
 
         if (secretClickCount === 5) {
@@ -243,7 +249,8 @@
             if (pin === "1234") {
                 localStorage.setItem('avit_is_admin_device', 'true');
                 document.getElementById('navigation-tabs').style.display = 'flex';
-                alert("Manager Access Unlocked! You can now see the tabs.");
+                generateLiveAppQR();
+                alert("Manager Access Unlocked! Tabs are visible.");
             } else {
                 alert("❌ Incorrect PIN.");
             }
@@ -252,7 +259,7 @@
     }
 
     // ---------------------------------------------------------
-    // ROCK-SOLID AUDIO ENGINE UNLOCKER
+    // AUDIO ENGINE WRAPPERS
     // ---------------------------------------------------------
     let activeAnnouncer = null;
     let isAudioEngineUnlocked = false;
@@ -264,7 +271,6 @@
         window.speechSynthesis.speak(silentPing);
         isAudioEngineUnlocked = true;
         
-        // Hide the warning banner once audio is enabled
         const warningBanner = document.getElementById('audio-unlock-warning');
         if (warningBanner) warningBanner.style.display = 'none';
 
@@ -292,29 +298,8 @@
         }
     }
 
-    function triggerKDSAlertOverlay(name, items, total, notes) {
-        document.getElementById('kds-alert-body').innerHTML = `
-            <div class="text-left leading-relaxed">
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Customer</span><br>
-                <span class="text-3xl">${name}</span><br><br>
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Cart Items</span><br>
-                <span class="text-xl text-orange-200 font-mono">${items}</span><br><br>
-                <span class="text-sm font-normal text-white/70 uppercase tracking-widest">Amount</span><br>
-                <span class="text-3xl text-emerald-400 tracking-tight">₹${total}</span>
-            </div>
-            <div class="mt-6 text-sm bg-black/40 p-4 rounded-xl border border-white/20 text-white font-sans text-left">
-                💡 <strong>Customer Note:</strong> ${notes}
-            </div>
-        `;
-        document.getElementById('kds-alert-overlay').classList.remove('hidden');
-    }
-
-    function dismissKDSAlert() { 
-        document.getElementById('kds-alert-overlay').classList.add('hidden'); 
-    }
-
     // ---------------------------------------------------------
-    // TAB MEMORY & VIEW SWITCHER
+    // APPLICATION ARCHITECTURE CORE
     // ---------------------------------------------------------
     function switchView(viewName) {
         localStorage.setItem('avit_active_tab', viewName); 
@@ -335,11 +320,11 @@
 
     async function loadInitialState() {
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
-        
         if (isManagerDevice) {
             document.getElementById('navigation-tabs').style.display = 'flex';
             const savedTab = localStorage.getItem('avit_active_tab') || 'owner';
             switchView(savedTab);
+            generateLiveAppQR();
         } else {
             switchView('customer');
         }
@@ -354,14 +339,30 @@
                 activeMenu = data;
                 renderFrontendMenu();
                 renderAdminMenuList();
+                renderProfessionalCart();
                 return;
             }
         }
         
-        const storedMenu = localStorage.getItem('avit_menu_items');
-        if (storedMenu) activeMenu = JSON.parse(storedMenu);
+        activeMenu = [
+            { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
+            { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
+        ];
         renderFrontendMenu();
         renderAdminMenuList();
+        renderProfessionalCart();
+    }
+
+    function generateLiveAppQR() {
+        const currentTargetURL = window.location.href;
+        const urlTextContainer = document.getElementById('qrcode-url-text');
+        if(urlTextContainer) urlTextContainer.innerText = currentTargetURL;
+        
+        const qrContainer = document.getElementById('qrcode-target');
+        if(qrContainer) {
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: currentTargetURL, width: 140, height: 140, colorDark : "#1a337a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+        }
     }
 
     function switchMenuCategory(catName) {
@@ -460,7 +461,7 @@
             <div class="flex items-center justify-between py-4 transition-all ${!item.available ? 'bg-slate-50/60 rounded-xl px-2 my-1 border border-dashed border-slate-200' : ''}">
                 <div class="flex items-center gap-3">
                     <div class="relative">
-                        ${item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border bg-slate-100 ${!item.available ? 'grayscale blur-[0.5px]' : ''}">` : `<div class="w-12 h-12 rounded-xl bg-slate-100 border flex items-center justify-center text-xs text-slate-400">🍲</div>`}
+                        ${item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border bg-slate-100">` : `<div class="w-12 h-12 rounded-xl bg-slate-100 border flex items-center justify-center text-xs text-slate-400">🍲</div>`}
                     </div>
                     <div>
                         <strong class="block text-base font-semibold ${!item.available ? 'text-slate-400 line-through' : 'text-slate-900'}">${item.name}</strong>
@@ -469,7 +470,7 @@
                 </div>
                 <div>
                     ${item.available 
-                        ? `<button class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600 active:scale-95" onclick="addToCart('${item.name}', ${item.price})">+ Add</button>`
+                        ? `<button class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-orange-600 active:scale-95" onclick="addToCart('${item.name}', ${item.price}, '${item.image || ''}')">+ Add</button>`
                         : `<button disabled class="rounded-lg bg-slate-200 px-3 py-2 text-sm font-bold text-slate-400 cursor-not-allowed">Unavailable</button>`
                     }
                 </div>
@@ -500,7 +501,6 @@
         const item = activeMenu.find(i => i.id === id);
         if(item) {
             item.available = isChecked;
-            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
             renderFrontendMenu(); renderAdminMenuList();
         }
     }
@@ -526,7 +526,6 @@
             }
             const newItem = { id: Date.now(), name, price, category, available: true, image: base64Img };
             activeMenu.push(newItem);
-            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
             nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
             renderFrontendMenu(); renderAdminMenuList();
         };
@@ -548,7 +547,6 @@
                 return;
             }
             activeMenu = activeMenu.filter(item => item.id !== id);
-            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
             renderFrontendMenu(); renderAdminMenuList();
         }
     }
@@ -558,47 +556,117 @@
         if (supabase) {
             const { data, error } = await supabase.from('orders').select('total, payment_method');
             if (!error && data) orders = data;
-        } else {
-            orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
         }
-
         let total = 0, upi = 0, cash = 0;
         orders.forEach(o => {
-            const amt = parseFloat(o.total || o.total_amount || 0);
-            const method = o.payment_method || o.paymentMethod || "UPI Pending";
+            const amt = parseFloat(o.total || 0);
+            const method = o.payment_method || "UPI Pending";
             total += amt;
             if(method === "Cash") cash += amt;
             else upi += amt;
         });
-
         document.getElementById('stat-total-revenue').innerText = `₹${total}`;
         document.getElementById('stat-total-orders').innerText = orders.length;
         document.getElementById('stat-upi-revenue').innerText = `₹${upi}`;
         document.getElementById('stat-cash-revenue').innerText = `₹${cash}`;
     }
 
-    function addToCart(itemName, price) {
-        currentCart.push(itemName);
-        cartTotal += price;
-        const summary = document.getElementById('cart-summary');
-        summary.className = "mt-5 rounded-xl bg-orange-50 p-3.5 text-center text-sm font-bold text-orange-600 border border-orange-200/60 shadow-inner";
-        summary.innerText = `Total: ₹${cartTotal} (${currentCart.join(', ')})`;
+    // ---------------------------------------------------------
+    // RE-ENGINEERED CHECKOUT ARCHITECTURE & QUANTITY ADJUSTMENT
+    // ---------------------------------------------------------
+    function addToCart(itemName, price, image) {
+        const existingItem = currentCart.find(item => item.name === itemName);
+        if (existingItem) {
+            existingItem.qty++;
+        } else {
+            currentCart.push({ name: itemName, price: price, qty: 1, image: image });
+        }
+        renderProfessionalCart();
     }
 
+    function modifyQty(itemName, change) {
+        const item = currentCart.find(i => i.name === itemName);
+        if (!item) return;
+
+        item.qty += change;
+        if (item.qty <= 0) {
+            currentCart = currentCart.filter(i => i.name !== itemName);
+        }
+        renderProfessionalCart();
+    }
+
+    function removeItemFromCart(itemName) {
+        currentCart = currentCart.filter(i => i.name !== itemName);
+        renderProfessionalCart();
+    }
+
+    function renderProfessionalCart() {
+        const container = document.getElementById('pro-cart-container');
+        
+        if (currentCart.length === 0) {
+            container.innerHTML = `
+                <div class="py-8 text-center text-sm font-semibold text-slate-400 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                    Your cart is currently empty
+                </div>`;
+            cartTotal = 0;
+            document.getElementById('pro-cart-grand-total').innerText = "₹0";
+            return;
+        }
+
+        cartTotal = currentCart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        document.getElementById('pro-cart-grand-total').innerText = `₹${cartTotal}`;
+
+        container.innerHTML = currentCart.map(item => `
+            <div class="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                <div class="flex items-center gap-3">
+                    ${item.image ? `<img src="${item.image}" class="w-10 h-10 object-cover rounded-lg border bg-slate-50">` : `<div class="w-10 h-10 rounded-lg bg-slate-50 border flex items-center justify-center text-xs">🍛</div>`}
+                    <div>
+                        <span class="block text-sm font-bold text-slate-900">${item.name}</span>
+                        <span class="text-xs font-semibold text-slate-400">₹${item.price} each</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Quantity Box -->
+                    <div class="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200/50">
+                        <button onclick="modifyQty('${item.name}', -1)" class="w-7 h-7 flex items-center justify-center text-sm font-black text-slate-600 hover:bg-white rounded-md transition-all active:scale-90">−</button>
+                        <span class="w-8 text-center text-sm font-bold text-slate-800">${item.qty}</span>
+                        <button onclick="modifyQty('${item.name}', 1)" class="w-7 h-7 flex items-center justify-center text-sm font-black text-slate-600 hover:bg-white rounded-md transition-all active:scale-90">+</button>
+                    </div>
+                    
+                    <div class="text-right min-w-[60px]">
+                        <span class="block text-sm font-extrabold text-slate-900">₹${item.price * item.qty}</span>
+                        <button onclick="removeItemFromCart('${item.name}')" class="text-[10px] font-bold text-red-500 hover:underline">Remove</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ---------------------------------------------------------
+    // THE ADVANCED PAYMENT PROOF SUBMITTER
+    // ---------------------------------------------------------
     async function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
         const notesInput = document.getElementById('custNotes').value.trim();
+        const btnSubmit = document.getElementById('btn-submit-order');
         
         if (!nameInput) { alert("Please enter your name!"); return; }
         if (currentCart.length === 0) { alert("Your cart is empty."); return; }
 
+        // 1. Visually lock the submit button so the user knows it's executing
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "Processing Payment Intent...";
+        btnSubmit.className = "mt-4 w-full rounded-xl bg-slate-400 py-4 text-center text-base font-bold text-white cursor-not-allowed transition";
+
         const orderId = Math.floor(1000 + Math.random() * 9000);
-        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
         const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
         
         if (supabase) {
-            const jsonCartData = JSON.stringify(currentCart);
+            // Flatten the cart format into structural rows for kitchen reading
+            const arrayItemsFlattened = currentCart.map(i => `${i.name} (x${i.qty})`);
+            const jsonCartData = JSON.stringify(arrayItemsFlattened);
 
             const { error } = await supabase.from('orders').insert([{
                 order_number: orderId.toString(),
@@ -606,46 +674,33 @@
                 notes: notesInput || "None",
                 items: jsonCartData,
                 total: cartTotal.toString(),
-                payment_method: "UPI Pending"
+                payment_method: "UPI Pending" // Saved explicitly as pending!
             }]);
 
             if (!error) {
+                // Trigger local synchronization handshake
                 localStorage.setItem('avit_force_sync', Date.now().toString());
 
-                alert(`Order #${orderId} Placed Successfully!`);
-                currentCart = []; cartTotal = 0;
+                // 2. Clear out the fields and state gracefully AFTER successful database logging
+                currentCart = [];
+                renderProfessionalCart();
                 document.getElementById('custName').value = '';
                 document.getElementById('custNotes').value = '';
-                document.getElementById('cart-summary').innerText = 'Cart is empty';
+
+                // Restore checkout button format back to active
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Proceed & Pay via UPI";
+                btnSubmit.className = "mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98]";
+
+                // 3. Launch UPI intent app window
                 window.location.href = upiIntent;
             } else {
                 alert("Order Dispatch Failed: " + error.message);
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Proceed & Pay via UPI";
+                btnSubmit.className = "mt-4 w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white id='btn-submit-order'";
             }
-            return;
         }
-
-        const newOrder = {
-            id: orderId,
-            order_number: orderId.toString(),
-            customer: nameInput,
-            notes: notesInput || "None",
-            items: currentCart,
-            total: cartTotal.toString(),
-            time: timestamp,
-            paymentMethod: "UPI Pending"
-        };
-
-        let existingOrders = JSON.parse(localStorage.getItem('express_orders') || '[]');
-        existingOrders.unshift(newOrder);
-        localStorage.setItem('express_orders', JSON.stringify(existingOrders));
-        window.dispatchEvent(new Event('storage'));
-
-        alert(`Order #${orderId} Placed Successfully!`);
-        currentCart = []; cartTotal = 0;
-        document.getElementById('custName').value = '';
-        document.getElementById('custNotes').value = '';
-        document.getElementById('cart-summary').innerText = 'Cart is empty';
-        window.location.href = upiIntent;
     }
 
     async function markOrderAsCash(orderId) {
@@ -654,15 +709,6 @@
             localStorage.setItem('avit_force_sync', Date.now().toString()); 
             await renderOwnerDashboard();
             await calculateRevenueDashboard();
-            return;
-        }
-        let orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
-        const targetOrder = orders.find(o => o.id === orderId);
-        if(targetOrder) {
-            targetOrder.paymentMethod = "Cash";
-            localStorage.setItem('express_orders', JSON.stringify(orders));
-            renderOwnerDashboard();
-            calculateRevenueDashboard();
         }
     }
 
@@ -684,17 +730,6 @@
                     paymentMethod: o.payment_method
                 }));
             }
-        } else {
-            orders = JSON.parse(localStorage.getItem('express_orders') || '[]').map(o => ({
-                id: o.id,
-                order_number: o.id,
-                customer: o.customer,
-                items: Array.isArray(o.items) ? o.items.join(', ') : o.items,
-                total: o.total,
-                notes: o.notes || "None",
-                time: o.time,
-                paymentMethod: o.paymentMethod
-            }));
         }
 
         if (orders.length === 0) {
@@ -702,21 +737,23 @@
             return;
         }
 
-        // ==========================================
-        // 🚨 BULLETPROOF AUDIO & ALERT LOGIC
-        // ==========================================
+        // =======================================================
+        // 🚨 CRITICAL CRITERIA: ONLY SOUND THE ALARM AFTER METHOD RISES
+        // =======================================================
         const lastAnnounced = localStorage.getItem('last_announced_id');
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
         const isLookingAtOrdersTab = localStorage.getItem('avit_active_tab') === 'owner' || localStorage.getItem('avit_active_tab') === 'admin';
 
-        if (isManagerDevice && isLookingAtOrdersTab && orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
+        // CRITICAL BUG FIX: Only trigger the intense flashing strobe and sound engine 
+        // if the status is paid ("Cash") OR if a new verified state updates. It no longer flashes for "UPI Pending"!
+        if (isManagerDevice && isLookingAtOrdersTab && orders.length > 0 && orders[0].paymentMethod !== "UPI Pending" && orders[0].id.toString() !== lastAnnounced) {
             triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
             triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
             localStorage.setItem('last_announced_id', orders[0].id.toString());
         }
 
         listContainer.innerHTML = orders.map(order => `
-            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition flex flex-col justify-between">
+            <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 ${order.paymentMethod === 'UPI Pending' ? 'border-amber-400' : 'border-emerald-500'} shadow-sm transition flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
                         <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.order_number} — ${order.customer}</span>
@@ -728,12 +765,12 @@
                     </div>
                 </div>
                 <div class="mt-2 pt-2 border-t border-dashed border-slate-200/60 flex items-center justify-between">
-                    <div class="text-base font-black ${order.paymentMethod === 'Cash' ? 'text-amber-600' : 'text-emerald-600'}">
-                        ✓ Collected: ₹${order.total} (${order.paymentMethod})
+                    <div class="text-base font-black ${order.paymentMethod === 'UPI Pending' ? 'text-amber-600' : 'text-emerald-600'}">
+                        Status: ${order.paymentMethod === 'UPI Pending' ? '⏳ Customer App Opening (Pending)' : `✓ Collected: ₹${order.total} (${order.paymentMethod})`}
                     </div>
                     ${order.paymentMethod === 'UPI Pending' ? `
-                        <button onclick="markOrderAsCash(${order.id})" class="text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl transition">
-                            💵 Switch to Cash Payment
+                        <button onclick="markOrderAsCash(${order.id})" class="text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-xl shadow-sm transition">
+                            💵 Accept Cash & Complete Order
                         </button>
                     ` : ''}
                 </div>
@@ -744,8 +781,6 @@
     async function clearAllOrders() {
         if(confirm("Flush order records?")) {
             if (supabase) await supabase.from('orders').delete().neq('id', 0);
-            else localStorage.removeItem('express_orders');
-            
             localStorage.removeItem('last_announced_id');
             localStorage.setItem('avit_force_sync', Date.now().toString()); 
             await renderOwnerDashboard(); 
@@ -753,11 +788,9 @@
         }
     }
 
-    // ==========================================
-    // 📡 100% BULLETPROOF SYNC ENGINE 
-    // ==========================================
-    
-    // Method 1: Supabase Realtime (WebSockets)
+    // ---------------------------------------------------------
+    // SYSTEM LIFECYCLE CHANNELS
+    // ---------------------------------------------------------
     if (supabase) {
         supabase.channel('custom-all-channel')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
@@ -770,8 +803,6 @@
           .subscribe();
     }
 
-    // Method 2: The "Heartbeat" Polling Fallback (Runs every 5 seconds no matter what!)
-    // This absolutely guarantees that even if Supabase Realtime is broken, your laptop will catch the order.
     setInterval(async () => {
         const isManager = localStorage.getItem('avit_is_admin_device') === 'true';
         const isOwnerTab = localStorage.getItem('avit_active_tab') === 'owner' || localStorage.getItem('avit_active_tab') === 'admin';
@@ -782,8 +813,7 @@
                 const latestOrder = data[0];
                 const lastAnnounced = localStorage.getItem('last_announced_id');
                 
-                // If the polling heartbeat finds an order that wasn't announced, force a dashboard refresh to trigger the alarm!
-                if (latestOrder.id.toString() !== lastAnnounced) {
+                if (latestOrder.id.toString() !== lastAnnounced && latestOrder.payment_method !== "UPI Pending") {
                     await renderOwnerDashboard();
                     await calculateRevenueDashboard();
                 }
@@ -791,7 +821,6 @@
         }
     }, 5000);
 
-    // Method 3: Local Storage Cross-Tab Sync (Backup for non-database setups)
     window.addEventListener('storage', async (e) => { 
         if (e.key === 'avit_force_sync' || e.key === 'express_orders') {
             await renderOwnerDashboard(); 
