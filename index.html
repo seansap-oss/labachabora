@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVIT Express Menu & Counter</title>
-    <!-- Include Supabase JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://ptegptezjnvnfzeveaxi.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0ZWdwdGV6am52bmZ6ZXZlYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTUzNTcsImV4cCI6MjA5NzY5MTM1N30.wUQNN6vbN1oTL-r3dGQfwqaxJsb1Zo8Fggv3gEWn_Ck";
         var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
     </script>
-    <!-- Include Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Include Local QR Code Generator Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -30,16 +27,12 @@
 
 <div class="mx-auto max-w-md pb-12" id="app-wrapper">
     
-    <!-- View Switcher Tabs (HIDDEN BY DEFAULT FROM CUSTOMERS) -->
     <div id="navigation-tabs" class="mb-5 gap-1 rounded-xl bg-slate-200 p-1" style="display: none;">
         <button id="tab-customer" class="flex-1 rounded-lg bg-blue-900 py-2.5 text-center text-xs font-bold text-white shadow transition-all" onclick="switchView('customer')">📱 Menu</button>
         <button id="tab-owner" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="switchView('owner')">🏪 Orders</button>
         <button id="tab-admin" class="flex-1 rounded-lg py-2.5 text-center text-xs font-bold text-slate-700 transition-all hover:bg-slate-300/50" onclick="triggerAdminAuth()">⚙️ Admin</button>
     </div>
 
-    <!-- ========================================== -->
-    <!--            1. CUSTOMER MENU VIEW           -->
-    <!-- ========================================== -->
     <div id="customer-view" class="space-y-4">
         <div id="hero-banner-container" class="relative overflow-hidden rounded-2xl bg-blue-900 p-6 text-center text-white shadow-md bg-cover bg-center min-h-[140px] flex flex-col justify-center items-center">
             <div class="absolute inset-0 bg-black/40 z-0"></div>
@@ -49,7 +42,6 @@
             </div>
         </div>
 
-        <!-- Category Menu Navigation Tabs -->
         <div class="flex gap-2 border-b border-slate-200 pb-1">
             <button id="cat-tab-drinks" onclick="switchMenuCategory('Tea/Coffee')" class="pb-2 px-4 text-sm font-bold text-blue-900 border-b-2 border-blue-900 transition-all">☕ Tea / Coffee</button>
             <button id="cat-tab-food" onclick="switchMenuCategory('Food')" class="pb-2 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent transition-all">🍔 Food Items</button>
@@ -59,13 +51,11 @@
             <div id="customer-menu-list" class="divide-y divide-slate-100"></div>
         </div>
 
-        <!-- RE-ENGINEERED CART WRAPPER -->
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-5">
             <h3 class="text-lg font-black text-slate-900 tracking-tight">Your Selection</h3>
             
             <div id="pro-cart-container" class="divide-y divide-slate-100 max-h-[280px] overflow-y-auto pr-1">
-                <!-- Cart rows stream here organically -->
-            </div>
+                </div>
 
             <div class="space-y-3 pt-2 border-t">
                 <div class="space-y-1.5">
@@ -84,14 +74,11 @@
             </div>
 
             <button id="btn-submit-order" class="w-full rounded-xl bg-emerald-600 py-4 text-center text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed" onclick="processExpressCheckout()">
-                Proceed & Pay via UPI
+                Loading checkout...
             </button>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!--            1.5 CLIENT DYNAMIC QR HUB       -->
-    <!-- ========================================== -->
     <div id="payment-view" class="hidden space-y-4">
         <div class="rounded-2xl bg-white p-6 shadow-sm border border-slate-100 text-center">
             <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">💸</div>
@@ -127,12 +114,9 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!--            2. OWNER ORDERS VIEW            -->
-    <!-- ========================================== -->
     <div id="owner-view" class="hidden space-y-4">
         <div id="audio-unlock-warning" class="bg-red-600 text-white p-3 rounded-xl shadow-md text-center font-bold text-sm cursor-pointer animate-pulse" onclick="unlockBrowserAudio()">
-            * ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
+            🔇 ACTION REQUIRED: Click here to Enable Audio & Order Alerts!
         </div>
 
         <div class="rounded-2xl bg-slate-900 p-6 text-center text-white shadow-md relative">
@@ -148,9 +132,6 @@
         <div id="incoming-orders-list" class="space-y-3"></div>
     </div>
 
-    <!-- ========================================== -->
-    <!--            3. ADMIN SETUP VIEW             -->
-    <!-- ========================================== -->
     <div id="admin-view" class="hidden space-y-6">
         <div class="rounded-2xl bg-slate-800 p-6 text-center text-white shadow-md">
             <h2 class="text-2xl font-black tracking-tight text-purple-400">Control & Design Panel</h2>
@@ -187,8 +168,8 @@
         <div class="rounded-2xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
             <h3 class="text-base font-bold text-slate-900 tracking-tight border-b pb-2">1. Core Identity & Banner</h3>
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Merchant UPI ID (VPA)</label>
-                <input type="text" id="admin-upi" class="w-full rounded-xl border p-2.5 text-sm">
+                <label class="text-xs font-bold text-slate-600">Merchant UPI ID (VPA) <span class="font-normal text-slate-400">- Leave blank to use Physical Shop QR Mode</span></label>
+                <input type="text" id="admin-upi" class="w-full rounded-xl border p-2.5 text-sm" placeholder="e.g. client@okaxis">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-600">Brand Name</label>
@@ -367,6 +348,15 @@
         });
     }
 
+    function updateCheckoutButtonLabel() {
+        const btn = document.getElementById('btn-submit-order');
+        if (systemConfig.upi && systemConfig.upi.trim() !== "") {
+            btn.innerText = "Proceed to Payment";
+        } else {
+            btn.innerText = "Place Order at Counter";
+        }
+    }
+
     async function loadInitialState() {
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
         if (isManagerDevice) {
@@ -381,6 +371,7 @@
         const storedConfig = localStorage.getItem('avit_system_config');
         if (storedConfig) systemConfig = JSON.parse(storedConfig);
         applyRenderedConfigurations();
+        updateCheckoutButtonLabel();
 
         if (supabase) {
             const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
@@ -393,10 +384,6 @@
             }
         }
         
-        activeMenu = [
-            { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
-            { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
-        ];
         renderFrontendMenu();
         renderAdminMenuList();
         renderProfessionalCart();
@@ -483,11 +470,12 @@
         systemConfig.brandName = document.getElementById('admin-brand-name').value.trim();
         localStorage.setItem('avit_system_config', JSON.stringify(systemConfig));
         applyRenderedConfigurations();
+        updateCheckoutButtonLabel();
         alert("Settings saved successfully!");
     }
 
     function populateAdminForm() {
-        document.getElementById('admin-upi').value = systemConfig.upi;
+        document.getElementById('admin-upi').value = systemConfig.upi || "";
         document.getElementById('admin-brand-name').value = systemConfig.brandName;
     }
 
@@ -507,14 +495,14 @@
         }
 
         list.innerHTML = itemsToDisplay.map(item => `
-            <div class="flex items-center justify-between py-4 transition-all ${!item.available ? 'bg-slate-50/60 rounded-xl px-2 my-1 border border-dashed border-slate-200' : ''}">
+            <div class="flex items-center justify-between py-4 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         ${item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border bg-slate-100">` : `<div class="w-12 h-12 rounded-xl bg-slate-100 border flex items-center justify-center text-xs text-slate-400">🍲</div>`}
                     </div>
                     <div>
-                        <strong class="block text-base font-semibold ${!item.available ? 'text-slate-400 line-through' : 'text-slate-900'}">${item.name}</strong>
-                        <span class="text-sm font-medium ${!item.available ? 'text-slate-400' : 'text-slate-500'}">₹${item.price}</span>
+                        <strong class="block text-base font-semibold text-slate-900">${item.name}</strong>
+                        <span class="text-sm font-medium text-slate-500">₹${item.price}</span>
                     </div>
                 </div>
                 <div>
@@ -533,7 +521,7 @@
             <div class="flex items-center justify-between py-3">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleItemAvailability(${item.id}, this.checked)" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500">
-                    <span class="font-bold text-slate-900 text-sm ${!item.available ? 'line-through text-slate-400' : ''}">${item.name} <span class="text-[10px] font-medium text-slate-400">(${item.category})</span></span>
+                    <span class="font-bold text-slate-900 text-sm ${!item.available ? 'line-through text-slate-400' : ''}">${item.name}</span>
                     <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">₹${item.price}</span>
                 </div>
                 <button class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded-lg" onclick="deleteMenuItem(${item.id})">Remove</button>
@@ -545,12 +533,6 @@
         if (supabase) {
             await supabase.from('products').update({ available: isChecked }).eq('id', id);
             await loadInitialState();
-            return;
-        }
-        const item = activeMenu.find(i => i.id === id);
-        if(item) {
-            item.available = isChecked;
-            renderFrontendMenu(); renderAdminMenuList();
         }
     }
 
@@ -571,12 +553,7 @@
                 await supabase.from('products').insert([{ name, price, category, available: true, image: base64Img }]);
                 nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
                 await loadInitialState();
-                return;
             }
-            const newItem = { id: Date.now(), name, price, category, available: true, image: base64Img };
-            activeMenu.push(newItem);
-            nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
-            renderFrontendMenu(); renderAdminMenuList();
         };
 
         if (imgInput.files && imgInput.files[0]) {
@@ -593,10 +570,7 @@
             if (supabase) {
                 await supabase.from('products').delete().eq('id', id);
                 await loadInitialState();
-                return;
             }
-            activeMenu = activeMenu.filter(item => item.id !== id);
-            renderFrontendMenu(); renderAdminMenuList();
         }
     }
 
@@ -609,7 +583,7 @@
         let total = 0, upi = 0, cash = 0;
         orders.forEach(o => {
             const amt = parseFloat(o.total || 0);
-            const method = o.payment_method || "Pending";
+            const method = o.payment_method || "Pending Verification";
             total += amt;
             if(method === "Cash") cash += amt;
             else if(method === "Verified UPI") upi += amt;
@@ -620,6 +594,9 @@
         document.getElementById('stat-cash-revenue').innerText = `₹${cash}`;
     }
 
+    // ---------------------------------------------------------
+    // LIVE INTERACTIVE CART SYSTEMS
+    // ---------------------------------------------------------
     function addToCart(itemName, price, image) {
         const existingItem = currentCart.find(item => item.name === itemName);
         if (existingItem) {
@@ -689,7 +666,7 @@
     }
 
     // ---------------------------------------------------------
-    // DUAL-GATE STAGING ENGINE (ZERO ACCIDENTAL ALARMS)
+    // THE DUAL-MODE CHECKOUT EXECUTION LOGIC
     // ---------------------------------------------------------
     async function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
@@ -700,58 +677,68 @@
         if (currentCart.length === 0) { alert("Your cart is empty."); return; }
 
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "Staging Order Record...";
+        btnSubmit.innerText = "Processing...";
 
         const orderId = Math.floor(1000 + Math.random() * 9000);
-        const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
-        const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
+        
+        // Check which mode the Admin has configured
+        const isDynamicAppMode = systemConfig.upi && systemConfig.upi.trim() !== "";
         
         if (supabase) {
             const arrayItemsFlattened = currentCart.map(i => `${i.name} (x${i.qty})`);
             const jsonCartData = JSON.stringify(arrayItemsFlattened);
 
-            // Gate 1: Save silently as 'Pending Verification'
-            const { data, error } = await supabase.from('orders').insert([{
+            // Both modes stage the order identically for security
+            const { error } = await supabase.from('orders').insert([{
                 order_number: orderId.toString(),
                 customer: nameInput,
                 notes: notesInput || "None",
                 items: jsonCartData,
                 total: cartTotal.toString(),
                 payment_method: "Pending Verification" 
-            }]).select();
+            }]);
 
-            if (!error && data && data.length > 0) {
-                // Initialize the structural Payment Gateway View components
-                document.getElementById('pay-order-id').innerText = orderId;
-                document.getElementById('pay-amount').innerText = cartTotal;
-                document.getElementById('mobile-pay-btn').href = upiIntent;
+            if (!error) {
+                if (isDynamicAppMode) {
+                    // MODE 2: Dynamic App Hub Flow
+                    const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
+                    const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
+                    
+                    document.getElementById('pay-order-id').innerText = orderId;
+                    document.getElementById('pay-amount').innerText = cartTotal;
+                    document.getElementById('mobile-pay-btn').href = upiIntent;
 
-                document.getElementById('checkout-qrcode').innerHTML = "";
-                new QRCode(document.getElementById('checkout-qrcode'), {
-                    text: upiIntent,
-                    width: 180,
-                    height: 180,
-                    colorDark : "#1e3a8a",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
+                    document.getElementById('checkout-qrcode').innerHTML = "";
+                    new QRCode(document.getElementById('checkout-qrcode'), {
+                        text: upiIntent,
+                        width: 180,
+                        height: 180,
+                        colorDark : "#1e3a8a",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    
+                    switchView('payment');
+                } else {
+                    // MODE 1: Simplified Shop QR Sticker Flow
+                    alert(`Order #${orderId} staged successfully! Total: ₹${cartTotal}.\n\nPlease scan the physical QR code sticker at the counter to complete your payment.`);
+                    switchView('customer'); 
+                }
 
-                // Clear customer checkout form cleanly
+                // Reset inputs seamlessly
                 currentCart = [];
                 renderProfessionalCart();
                 document.getElementById('custName').value = '';
                 document.getElementById('custNotes').value = '';
-
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = "Proceed & Pay via UPI";
                 
-                // Shift focus to the dedicated gateway screen
-                switchView('payment');
+                updateCheckoutButtonLabel();
+                btnSubmit.disabled = false;
+                
                 localStorage.setItem('avit_force_sync', Date.now().toString());
             } else {
                 alert("Order Dispatch Failed: " + error.message);
+                updateCheckoutButtonLabel();
                 btnSubmit.disabled = false;
-                btnSubmit.innerText = "Proceed & Pay via UPI";
             }
         }
     }
@@ -763,7 +750,6 @@
     // Cashier triggers this when approving the transaction on the counter laptop
     async function counterApproveUPI(dbId) {
         if (supabase) {
-            // Gate 2: Elevate status to 'Verified UPI' to trigger the alarms
             await supabase.from('orders').update({ payment_method: 'Verified UPI' }).eq('id', dbId);
             localStorage.setItem('avit_force_sync', Date.now().toString());
             await renderOwnerDashboard();
@@ -773,7 +759,6 @@
 
     async function counterApproveCash(dbId) {
         if (supabase) {
-            // Gate 2: Elevate status to 'Cash' to trigger the alarms
             await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', dbId);
             localStorage.setItem('avit_force_sync', Date.now().toString());
             await renderOwnerDashboard();
@@ -807,7 +792,7 @@
         }
 
         // ==========================================
-        // DUAL-GATE ALARM TRIGGER HANDSHAKE
+        // SECURE KDS ALARM & AUDIO VERIFIER
         // ==========================================
         let announcedList = (localStorage.getItem('avit_announced_orders') || '').split(',').filter(Boolean);
         const isManagerDevice = localStorage.getItem('avit_is_admin_device') === 'true';
@@ -815,7 +800,6 @@
 
         if (isManagerDevice && isLookingAtOrdersTab) {
             for (let order of orders) {
-                // The alert ONLY fires if the status is explicitly upgraded by the counter cashier
                 if ((order.paymentMethod === 'Verified UPI' || order.paymentMethod === 'Cash') && !announcedList.includes(order.id.toString())) {
                     triggerVocalNotification(order.customer, order.total, order.paymentMethod === 'Cash');
                     triggerKDSAlertOverlay(order.customer, order.items, order.total, order.notes);
@@ -845,7 +829,7 @@
                 </div>
                 <div class="mt-4 pt-3 border-t border-dashed border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="text-sm font-black ${isUnverified ? 'text-amber-600' : 'text-emerald-600'}">
-                        ${isUnverified ? '🛎️ Staged: Check Bank App or Screenshot' : `✓ Approved: ₹${order.total} (${order.paymentMethod})`}
+                        ${isUnverified ? '🛎️ Staged: Awaiting Approval' : `✓ Approved: ₹${order.total} (${order.paymentMethod})`}
                     </div>
                     ${isUnverified ? `
                         <div class="flex gap-2">
