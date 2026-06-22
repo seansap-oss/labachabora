@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = "https://yzklxxmrdditnuotbpdi.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5cmhxa2R3eHRkcm5xZ3VwaHJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjUxNjAsImV4cCI6MjA5NzY0MTE2MH0.24Lf3m5Np1wnSBiBCF6gQkMDAVA1JhPKNVCu_MOw-7A"; // 👈 Paste your real long anon key here!
+    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+</script>
 <html lang="en" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
@@ -203,18 +209,41 @@
 
 <script>
     let systemConfig = { upi: "devranakitchen@okaxis", brandName: "Laba ChaBora", bannerBase64: "" };
-    
-    const defaultItems = [
-        { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
-        { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
-    ];
-
     let activeMenu = [];
     let currentCart = [];
     let cartTotal = 0;
     let qrEngineInstance = null;
     let isTheaterModeActive = false;
     let selectedCategoryFilter = "Tea/Coffee";
+
+    async function loadInitialState() {
+        const storedConfig = localStorage.getItem('avit_system_config');
+        if (storedConfig) systemConfig = JSON.parse(storedConfig);
+        applyRenderedConfigurations();
+
+        if (supabase) {
+            const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
+            if (!error && data) {
+                activeMenu = data;
+                renderFrontendMenu();
+                renderAdminMenuList();
+                return;
+            }
+        }
+        
+        const storedMenu = localStorage.getItem('avit_menu_items');
+        if (storedMenu) {
+            activeMenu = JSON.parse(storedMenu);
+        } else {
+            activeMenu = [
+                { id: 1, name: "Classic Filter Coffee", price: 80, category: "Tea/Coffee", available: true, image: "" },
+                { id: 2, name: "Butter Masala Dosa", price: 140, category: "Food", available: true, image: "" }
+            ];
+            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
+        }
+        renderFrontendMenu();
+        renderAdminMenuList();
+    }
 
     function switchView(viewName) {
         if(isTheaterModeActive) toggleTheaterMode(false);
@@ -325,22 +354,6 @@
         bannerElement.style.backgroundImage = systemConfig.bannerBase64 ? `url('${systemConfig.bannerBase64}')` : 'none';
     }
 
-    function loadInitialState() {
-        const storedConfig = localStorage.getItem('avit_system_config');
-        if (storedConfig) systemConfig = JSON.parse(storedConfig);
-
-        const storedMenu = localStorage.getItem('avit_menu_items');
-        if (storedMenu) {
-            activeMenu = JSON.parse(storedMenu);
-        } else {
-            activeMenu = [...defaultItems];
-            localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
-        }
-        applyRenderedConfigurations();
-        renderFrontendMenu();
-        renderAdminMenuList();
-    }
-
     function renderFrontendMenu() {
         const list = document.getElementById('customer-menu-list');
         const itemsToDisplay = activeMenu.filter(i => i.category === selectedCategoryFilter);
@@ -386,7 +399,12 @@
         `).join('');
     }
 
-    function toggleItemAvailability(id, isChecked) {
+    async function toggleItemAvailability(id, isChecked) {
+        if (supabase) {
+            const { error } = await supabase.from('products').update({ available: isChecked }).eq('id', id);
+            if (!error) await loadInitialState();
+            return;
+        }
         const item = activeMenu.find(i => i.id === id);
         if(item) {
             item.available = isChecked;
@@ -396,7 +414,7 @@
         }
     }
 
-    function addNewMenuItem() {
+    async function addNewMenuItem() {
         const nameInput = document.getElementById('new-item-name');
         const priceInput = document.getElementById('new-item-price');
         const catSelect = document.getElementById('new-item-category');
@@ -411,7 +429,15 @@
             return;
         }
 
-        const proceedAndSave = (base64Img = "") => {
+        const proceedAndSave = async (base64Img = "") => {
+            if (supabase) {
+                const { error } = await supabase.from('products').insert([{ name, price, category, available: true, image: base64Img }]);
+                if (!error) {
+                    nameInput.value = ''; priceInput.value = ''; imgInput.value = '';
+                    await loadInitialState();
+                }
+                return;
+            }
             const newItem = { id: Date.now(), name, price, category, available: true, image: base64Img };
             activeMenu.push(newItem);
             localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
@@ -421,27 +447,40 @@
 
         if (imgInput.files && imgInput.files[0]) {
             const reader = new FileReader();
-            reader.onload = function(e) { proceedAndSave(e.target.result); };
+            reader.onload = async function(e) { await proceedAndSave(e.target.result); };
             reader.readAsDataURL(imgInput.files[0]);
         } else {
-            proceedAndSave();
+            await proceedAndSave();
         }
     }
 
-    function deleteMenuItem(id) {
+    async function deleteMenuItem(id) {
+        if (supabase) {
+            const { error } = await supabase.from('products').delete().eq('id', id);
+            if (!error) await loadInitialState();
+            return;
+        }
         activeMenu = activeMenu.filter(item => item.id !== id);
         localStorage.setItem('avit_menu_items', JSON.stringify(activeMenu));
         renderFrontendMenu(); renderAdminMenuList();
     }
 
-    function calculateRevenueDashboard() {
-        const orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+    async function calculateRevenueDashboard() {
+        let orders = [];
+        if (supabase) {
+            const { data, error } = await supabase.from('orders').select('total, payment_method');
+            if (!error && data) orders = data;
+        } else {
+            orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+        }
+
         let total = 0, upi = 0, cash = 0;
-        
         orders.forEach(o => {
-            total += o.total;
-            if(o.paymentMethod === "Cash") cash += o.total;
-            else upi += o.total;
+            const amt = o.total || o.total_amount || 0;
+            const method = o.payment_method || o.paymentMethod || "UPI Pending";
+            total += amt;
+            if(method === "Cash") cash += amt;
+            else upi += amt;
         });
 
         document.getElementById('stat-total-revenue').innerText = `₹${total}`;
@@ -458,7 +497,7 @@
         summary.innerText = `Total: ₹${cartTotal} (${currentCart.join(', ')})`;
     }
 
-    function processExpressCheckout() {
+    async function processExpressCheckout() {
         const nameInput = document.getElementById('custName').value.trim();
         const notesInput = document.getElementById('custNotes').value.trim();
         
@@ -470,10 +509,29 @@
         const cleanBrandURI = encodeURIComponent(systemConfig.brandName);
         const upiIntent = `upi://pay?pa=${systemConfig.upi}&pn=${cleanBrandURI}&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`;
         
+        if (supabase) {
+            const { error } = await supabase.from('orders').insert([{
+                order_number: orderId,
+                customer: nameInput,
+                notes: notesInput || "None",
+                items: currentCart.join(', '),
+                total: cartTotal,
+                payment_method: "UPI Pending"
+            }]);
+            if (!error) {
+                window.location.href = upiIntent;
+                currentCart = []; cartTotal = 0;
+                document.getElementById('custName').value = '';
+                document.getElementById('custNotes').value = '';
+                document.getElementById('cart-summary').innerText = 'Cart is empty';
+            }
+            return;
+        }
+
         const newOrder = {
             id: orderId,
             customer: nameInput,
-            notes: notesInput || "None", // Capture custom note block safely
+            notes: notesInput || "None",
             items: currentCart.join(', '),
             total: cartTotal,
             time: timestamp,
@@ -491,11 +549,19 @@
         document.getElementById('custName').value = '';
         document.getElementById('custNotes').value = '';
         const summary = document.getElementById('cart-summary');
-        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-dashed border-slate-200";
+        summary.className = "mt-5 rounded-xl bg-slate-50 p-3.5 text-center text-sm font-semibold text-slate-600 border border-dashed border-slate-200";
         summary.innerText = 'Cart is empty';
     }
 
-    function markOrderAsCash(orderId) {
+    async function markOrderAsCash(orderId) {
+        if (supabase) {
+            const { error } = await supabase.from('orders').update({ payment_method: 'Cash' }).eq('id', orderId);
+            if (!error) {
+                await renderOwnerDashboard();
+                await calculateRevenueDashboard();
+            }
+            return;
+        }
         let orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
         const targetOrder = orders.find(o => o.id === orderId);
         if(targetOrder) {
@@ -507,9 +573,36 @@
         }
     }
 
-    function renderOwnerDashboard() {
+    async function renderOwnerDashboard() {
         const listContainer = document.getElementById('incoming-orders-list');
-        const orders = JSON.parse(localStorage.getItem('express_orders') || '[]');
+        let orders = [];
+
+        if (supabase) {
+            const { data, error } = await supabase.from('orders').select('*').order('id', { ascending: false });
+            if (!error && data) {
+                orders = data.map(o => ({
+                    id: o.id,
+                    order_number: o.order_number || o.id,
+                    customer: o.customer,
+                    items: o.items,
+                    total: o.total,
+                    notes: o.notes || "None",
+                    time: o.created_at ? o.created_at.substring(11,16) : '',
+                    paymentMethod: o.payment_method
+                }));
+            }
+        } else {
+            orders = JSON.parse(localStorage.getItem('express_orders') || '[]').map(o => ({
+                id: o.id,
+                order_number: o.id,
+                customer: o.customer,
+                items: o.items,
+                total: o.total,
+                notes: o.notes || "None",
+                time: o.time,
+                paymentMethod: o.paymentMethod
+            }));
+        }
 
         if (orders.length === 0) {
             listContainer.innerHTML = '<p class="py-12 text-center text-sm font-medium text-slate-400 bg-white rounded-2xl border border-slate-100 shadow-sm">Waiting for new orders...</p>';
@@ -518,7 +611,7 @@
 
         const lastAnnounced = localStorage.getItem('last_announced_id');
         if (orders.length > 0 && orders[0].id.toString() !== lastAnnounced) {
-            triggerVocalNotification(orders[0].customer, orders[0].total, false);
+            triggerVocalNotification(orders[0].customer, orders[0].total, orders[0].paymentMethod === 'Cash');
             triggerKDSAlertOverlay(orders[0].customer, orders[0].items, orders[0].total, orders[0].notes);
             localStorage.setItem('last_announced_id', orders[0].id.toString());
         }
@@ -527,12 +620,10 @@
             <div class="${isTheaterModeActive ? 'bg-slate-900 border border-slate-800 text-white p-6' : 'bg-white border border-slate-100 p-5'} rounded-2xl border-l-4 border-orange-500 shadow-sm transition flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-sm font-bold ${isTheaterModeActive ? 'text-amber-400' : 'text-blue-900'}">
-                        <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.id} — ${order.customer}</span>
+                        <span class="text-lg font-extrabold ${isTheaterModeActive ? 'text-white' : 'text-slate-900'}">Order #${order.order_number} — ${order.customer}</span>
                         <span class="rounded-full ${isTheaterModeActive ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} px-2.5 py-1 text-xs font-semibold">${order.time}</span>
                     </div>
                     <div class="my-2 text-base font-medium ${isTheaterModeActive ? 'text-slate-300' : 'text-slate-600'}"><strong>Items:</strong> ${order.items}</div>
-                    
-                    <!-- Render Notes Block inside Receipt Card Line -->
                     <div class="my-2 p-2 rounded-xl text-xs font-semibold ${isTheaterModeActive ? 'bg-slate-950 border border-slate-800 text-orange-400' : 'bg-amber-50/70 border border-amber-100 text-amber-800'}">
                         📌 <strong>Notes:</strong> ${order.notes}
                     </div>
@@ -564,11 +655,16 @@
 
     function dismissKDSAlert() { document.getElementById('kds-alert-overlay').classList.add('hidden'); }
     
-    function clearAllOrders() {
+    async function clearAllOrders() {
         if(confirm("Flush order records?")) {
-            localStorage.removeItem('express_orders');
+            if (supabase) {
+                await supabase.from('orders').delete().neq('id', 0);
+            } else {
+                localStorage.removeItem('express_orders');
+            }
             localStorage.removeItem('last_announced_id');
-            renderOwnerDashboard(); calculateRevenueDashboard();
+            await renderOwnerDashboard(); 
+            await calculateRevenueDashboard();
         }
     }
 
@@ -581,6 +677,18 @@
             announcement.lang = 'en-IN'; announcement.rate = 0.95; announcement.volume = 1.0;
             window.speechSynthesis.speak(announcement);
         }
+    }
+
+    if (supabase) {
+        supabase.channel('custom-all-channel')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+              await renderOwnerDashboard();
+              await calculateRevenueDashboard();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+              await loadInitialState();
+          })
+          .subscribe();
     }
 
     window.addEventListener('storage', () => { renderOwnerDashboard(); calculateRevenueDashboard(); });
